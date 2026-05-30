@@ -32,6 +32,42 @@
             margin-top: 2px;
         }
 
+        /* 線頭篩選 */
+        .linehead-filter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .linehead-filter .filter-label {
+            color: #888;
+            font-size: 0.8em;
+            margin-right: 4px;
+        }
+        .lh-filter-btn {
+            padding: 5px 12px;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 16px;
+            background: rgba(255,255,255,0.04);
+            color: #aaa;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.2s;
+        }
+        .lh-filter-btn.active {
+            background: rgba(77,166,255,0.2);
+            border-color: rgba(77,166,255,0.5);
+            color: #4da6ff;
+            font-weight: bold;
+        }
+        .lh-filter-btn.all-btn.active {
+            background: rgba(255,215,0,0.15);
+            border-color: rgba(255,215,0,0.4);
+            color: #ffd700;
+        }
+
         /* 月份切換 */
         .month-nav {
             display: flex;
@@ -350,6 +386,12 @@
             <button onclick="changeMonth(1)">▶</button>
         </div>
 
+        <!-- 線頭篩選 -->
+        <div class="linehead-filter" id="lineheadFilter">
+            <span class="filter-label">線頭：</span>
+            <button class="lh-filter-btn all-btn active" onclick="setFilter('')">全部</button>
+        </div>
+
         <!-- 統計卡片 -->
         <div class="stats-row" id="statsRow">
             <div class="stat-card">
@@ -648,6 +690,7 @@
     // ========== 線頭管理 ==========
     let lineHeads = ['馬', '牛', '江', '杰'];
     let currentEditIndex = -1;
+    let currentFilter = ''; // 空字串=全部
 
     function loadLineHeads() {
         const saved = localStorage.getItem('macau_lineheads');
@@ -683,6 +726,31 @@
         lineHeads.forEach(lh => {
             sel.innerHTML += `<option value="${lh}">${lh}</option>`;
         });
+        // 更新篩選按鈕
+        renderFilterButtons();
+    }
+
+    function renderFilterButtons() {
+        const container = document.getElementById('lineheadFilter');
+        if (!container) return;
+        let html = '<span class="filter-label">線頭：</span>';
+        html += `<button class="lh-filter-btn all-btn ${currentFilter===''?'active':''}" onclick="setFilter('')">全部</button>`;
+        lineHeads.forEach(lh => {
+            html += `<button class="lh-filter-btn ${currentFilter===lh?'active':''}" onclick="setFilter('${lh}')">${lh}</button>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function setFilter(lh) {
+        currentFilter = lh;
+        renderFilterButtons();
+        renderAll();
+    }
+
+    function getFilteredRecords() {
+        const records = loadRecords();
+        if (!currentFilter) return records;
+        return records.filter(r => (r.lineHead || '') === currentFilter);
     }
 
     function openLineHeadModal() {
@@ -955,8 +1023,11 @@
         empty.style.display = 'none';
         summary.style.display = 'block';
 
+        const filtered = getFilteredRecords();
         let html = '';
-        records.forEach((r, i) => {
+        filtered.forEach((r) => {
+            // 找到在原始 records 中的 index
+            const origIdx = records.indexOf(r);
             const ci = r.checkIn ? r.checkIn.slice(5).replace('-','/') : '';
             const co = r.checkOut ? r.checkOut.slice(5).replace('-','/') : '';
             html += `<tr>
@@ -971,14 +1042,14 @@
                 <td class="col-need">${r.needWash}</td>
                 <td class="col-actual">${r.actualWash}</td>
                 <td>
-                    <button class="op-btn op-edit" onclick="openEdit(${i})">✏️</button>
-                    <button class="op-btn op-del" onclick="delRecord(${i})">🗑️</button>
+                    <button class="op-btn op-edit" onclick="openEdit(${origIdx})">✏️</button>
+                    <button class="op-btn op-del" onclick="delRecord(${origIdx})">🗑️</button>
                 </td>
             </tr>`;
         });
         tbody.innerHTML = html;
 
-        updateStats(records);
+        updateStats(filtered);
     }
 
     // ========== 統計計算 ==========
@@ -1072,9 +1143,10 @@
     // ========== 總覽 ==========
     function renderOverview() {
         const records = loadRecords();
+        const filtered = currentFilter ? records.filter(r => (r.lineHead || '') === currentFilter) : records;
         const overview = {};
 
-        records.forEach(r => {
+        filtered.forEach(r => {
             const key = (r.lineHead || '') + '_' + r.name;
             if (!overview[key]) {
                 overview[key] = { lineHead: r.lineHead || '', name: r.name, count: 0, amount: 0, needWash: 0, actualWash: 0 };
