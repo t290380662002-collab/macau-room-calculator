@@ -563,6 +563,10 @@
                 <div class="value green" id="statActualWash">0</div>
             </div>
             <div class="stat-card">
+                <div class="label">總計晚數</div>
+                <div class="value" id="statNights">0</div>
+            </div>
+            <div class="stat-card">
                 <div class="label">達標率</div>
                 <div class="value" id="statRate">0%</div>
             </div>
@@ -1372,10 +1376,15 @@
     // ========== 統計計算 ==========
     function updateStats(records) {
         let totalAmount = 0, totalNeed = 0, totalActual = 0;
+        let totalNights = 0;
         records.forEach(r => {
             totalAmount += r.amount;
             totalNeed += r.needWash;
             totalActual += r.actualWash;
+            if (r.checkIn && r.checkOut) {
+                const diff = Math.round((new Date(r.checkOut) - new Date(r.checkIn)) / 86400000);
+                if (diff > 0) totalNights += diff;
+            }
         });
 
         const rate = totalNeed > 0 ? (totalActual / totalNeed * 100) : 0;
@@ -1390,6 +1399,7 @@
         document.getElementById('statTotalAmount').textContent = totalAmount.toLocaleString();
         document.getElementById('statNeedWash').textContent = totalNeed;
         document.getElementById('statActualWash').textContent = totalActual;
+        document.getElementById('statNights').textContent = totalNights;
         document.getElementById('statRate').textContent = rate.toFixed(1) + '%';
         document.getElementById('statDue').textContent = dueAmount.toLocaleString();
 
