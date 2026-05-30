@@ -154,6 +154,75 @@
             color: #000;
             font-weight: bold;
         }
+        .mp-quick-btns {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .mp-quick {
+            flex: 1;
+            padding: 6px 4px;
+            border: 1px solid #555;
+            border-radius: 6px;
+            background: transparent;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.15s;
+        }
+        .mp-quick:hover {
+            background: rgba(255,215,0,0.2);
+            color: #fff;
+            border-color: #d4af37;
+        }
+        .mp-quick.mp-q-active {
+            background: rgba(212,175,55,0.25);
+            color: #d4af37;
+            border-color: #d4af37;
+            font-weight: bold;
+        }
+        .mp-date-range {
+            margin-top: 10px;
+            border-top: 1px solid #333;
+            padding-top: 10px;
+        }
+        .mp-date-title {
+            color: #999;
+            font-size: 0.8em;
+            margin-bottom: 6px;
+        }
+        .mp-date-inputs {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .mp-date-inputs input {
+            flex: 1;
+            padding: 4px 6px;
+            border: 1px solid #555;
+            border-radius: 6px;
+            background: #1a1a2e;
+            color: #fff;
+            font-size: 0.85em;
+        }
+        .mp-date-inputs span {
+            color: #888;
+        }
+        .mp-date-ok {
+            width: 100%;
+            margin-top: 6px;
+            padding: 6px;
+            border: 1px solid #555;
+            border-radius: 6px;
+            background: rgba(212,175,55,0.15);
+            color: #d4af37;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.15s;
+        }
+        .mp-date-ok:hover {
+            background: rgba(212,175,55,0.3);
+        }
 
         /* 統計卡片區 */
         .stats-row {
@@ -446,6 +515,11 @@
             <button onclick="changeMonth(-1)">◀</button>
             <span class="month-label month-picker" id="monthLabel" onclick="openMonthPicker()">2025年6月</span>
             <div id="monthPicker" class="month-picker-dropdown" style="display:none">
+                <div class="mp-quick-btns">
+                    <button class="mp-quick" onclick="mpQuick('thisMonth')">📅 本月</button>
+                    <button class="mp-quick" onclick="mpQuick('thisWeek')">📆 本週</button>
+                    <button class="mp-quick" onclick="mpQuick('lastWeek')">📋 上週</button>
+                </div>
                 <div class="mp-year-nav">
                     <button onclick="mpYear(-1)">◀</button>
                     <span id="mpYearLabel">2026</span>
@@ -453,6 +527,15 @@
                 </div>
                 <div class="mp-months">
                     <span onclick="mpSelect(1)">1月</span><span onclick="mpSelect(2)">2月</span><span onclick="mpSelect(3)">3月</span><span onclick="mpSelect(4)">4月</span><span onclick="mpSelect(5)">5月</span><span onclick="mpSelect(6)">6月</span><span onclick="mpSelect(7)">7月</span><span onclick="mpSelect(8)">8月</span><span onclick="mpSelect(9)">9月</span><span onclick="mpSelect(10)">10月</span><span onclick="mpSelect(11)">11月</span><span onclick="mpSelect(12)">12月</span>
+                </div>
+                <div class="mp-date-range">
+                    <div class="mp-date-title">自訂日期範圍</div>
+                    <div class="mp-date-inputs">
+                        <input type="date" id="mpDateFrom" />
+                        <span>~</span>
+                        <input type="date" id="mpDateTo" />
+                    </div>
+                    <button class="mp-date-ok" onclick="mpDateRange()">確定</button>
                 </div>
             </div>
             <button onclick="changeMonth(1)">▶</button>
@@ -937,6 +1020,7 @@
 
     // 根據入住日期篩選當前月份的記錄
     function loadRecords() {
+        // 將被日期篩選模式覆寫
         const all = loadAllRecords();
         return all.filter(r => {
             if (!r.checkIn) return false;
@@ -977,7 +1061,114 @@
         }
     }
 
-    // ========== 月份選擇器 ==========
+    // ========== 日期篩選模式 ==========
+    // dateMode: 'month' | 'thisWeek' | 'lastWeek' | 'custom'
+    let dateMode = 'month';
+    let customDateFrom = '';
+    let customDateTo = '';
+
+    function mpQuick(mode) {
+        dateMode = mode;
+        document.getElementById('monthPicker').style.display = 'none';
+        if (mode === 'thisMonth') dateMode = 'month';
+        // 更新快速按鈕高亮
+        document.querySelectorAll('.mp-quick').forEach(b => b.classList.remove('mp-q-active'));
+        event.target.classList.add('mp-q-active');
+        currentYear = new Date().getFullYear();
+        currentMonth = new Date().getMonth() + 1;
+        renderAll();
+    }
+
+    function mpDateRange() {
+        const from = document.getElementById('mpDateFrom').value;
+        const to = document.getElementById('mpDateTo').value;
+        if (!from || !to) { alert('請選擇起止日期'); return; }
+        dateMode = 'custom';
+        customDateFrom = from;
+        customDateTo = to;
+        document.getElementById('monthPicker').style.display = 'none';
+        renderAll();
+    }
+
+    // 覆寫 loadRecords 以支援多種日期模式
+    const _origLoadRecords = loadRecords;
+    loadRecords = function() {
+        const all = loadAllRecords();
+        if (dateMode === 'month') {
+            return all.filter(r => {
+                if (!r.checkIn) return false;
+                const d = new Date(r.checkIn);
+                return d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth;
+            });
+        }
+        if (dateMode === 'thisWeek') {
+            const now = new Date();
+            const day = now.getDay() || 7; // 週一=1
+            const mon = new Date(now); mon.setDate(now.getDate() - day + 1); mon.setHours(0,0,0,0);
+            const sun = new Date(mon); sun.setDate(mon.getDate() + 6); sun.setHours(23,59,59,999);
+            return all.filter(r => {
+                if (!r.checkIn) return false;
+                const d = new Date(r.checkIn);
+                return d >= mon && d <= sun;
+            });
+        }
+        if (dateMode === 'lastWeek') {
+            const now = new Date();
+            const day = now.getDay() || 7;
+            const lastMon = new Date(now); lastMon.setDate(now.getDate() - day - 6); lastMon.setHours(0,0,0,0);
+            const lastSun = new Date(lastMon); lastSun.setDate(lastMon.getDate() + 6); lastSun.setHours(23,59,59,999);
+            return all.filter(r => {
+                if (!r.checkIn) return false;
+                const d = new Date(r.checkIn);
+                return d >= lastMon && d <= lastSun;
+            });
+        }
+        if (dateMode === 'custom') {
+            const from = new Date(customDateFrom); from.setHours(0,0,0,0);
+            const to = new Date(customDateTo); to.setHours(23,59,59,999);
+            return all.filter(r => {
+                if (!r.checkIn) return false;
+                const d = new Date(r.checkIn);
+                return d >= from && d <= to;
+            });
+        }
+        return all;
+    };
+
+    // 更新月份標籤顯示
+    const _origUpdateMonthLabel = updateMonthLabel;
+    updateMonthLabel = function() {
+        const el = document.getElementById('monthLabel');
+        if (dateMode === 'month') {
+            el.textContent = `${currentYear}年${currentMonth}月`;
+        } else if (dateMode === 'thisWeek') {
+            el.textContent = '本週';
+        } else if (dateMode === 'lastWeek') {
+            el.textContent = '上週';
+        } else if (dateMode === 'custom') {
+            el.textContent = customDateFrom + ' ~ ' + customDateTo;
+        }
+    };
+
+    // 切換月份時重設為月份模式
+    const _origChangeMonth = changeMonth;
+    changeMonth = function(delta) {
+        dateMode = 'month';
+        currentMonth += delta;
+        if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+        if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+        renderAll();
+    };
+
+    function mpSelect(m) {
+        dateMode = 'month';
+        currentYear = mpSelectedYear;
+        currentMonth = m;
+        document.getElementById('monthPicker').style.display = 'none';
+        renderAll();
+    }
+
+    // ========== 原有月份選擇器 ==========
     let mpSelectedYear = currentYear;
 
     function openMonthPicker() {
@@ -992,23 +1183,28 @@
         renderMonthPicker();
     }
 
-    function mpSelect(m) {
-        currentYear = mpSelectedYear;
-        currentMonth = m;
-        document.getElementById('monthPicker').style.display = 'none';
-        renderAll();
-    }
-
     function renderMonthPicker() {
         document.getElementById('mpYearLabel').textContent = mpSelectedYear;
         document.querySelectorAll('#monthPicker .mp-months span').forEach((el, i) => {
             const m = i + 1;
-            if (mpSelectedYear === currentYear && m === currentMonth) {
+            if (dateMode === 'month' && mpSelectedYear === currentYear && m === currentMonth) {
                 el.classList.add('mp-active');
             } else {
                 el.classList.remove('mp-active');
             }
         });
+        // 更新快速按鈕高亮
+        document.querySelectorAll('.mp-quick').forEach(b => b.classList.remove('mp-q-active'));
+        if (dateMode === 'month') {
+            const now = new Date();
+            if (currentYear === now.getFullYear() && currentMonth === now.getMonth() + 1) {
+                document.querySelector('.mp-quick[onclick*="thisMonth"]').classList.add('mp-q-active');
+            }
+        } else if (dateMode === 'thisWeek') {
+            document.querySelector('.mp-quick[onclick*="thisWeek"]').classList.add('mp-q-active');
+        } else if (dateMode === 'lastWeek') {
+            document.querySelector('.mp-quick[onclick*="lastWeek"]').classList.add('mp-q-active');
+        }
     }
 
     // 點擊外部關閉
@@ -1019,17 +1215,6 @@
             picker.style.display = 'none';
         }
     });
-
-    function changeMonth(delta) {
-        currentMonth += delta;
-        if (currentMonth > 12) { currentMonth = 1; currentYear++; }
-        if (currentMonth < 1) { currentMonth = 12; currentYear--; }
-        renderAll();
-    }
-
-    function updateMonthLabel() {
-        document.getElementById('monthLabel').textContent = `${currentYear}年${currentMonth}月`;
-    }
 
     // ========== Tab 切換 ==========
     function switchTab(name) {
