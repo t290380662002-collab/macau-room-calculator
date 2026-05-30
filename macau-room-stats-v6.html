@@ -865,6 +865,8 @@
     // 監聽 Firebase 即時更新
     function listenFirebaseRecords() {
         if (!firebaseReady || !db) return;
+        // 先取消舊的監聽（通過 off()）
+        db.ref('records/' + storageKey()).off('value');
         db.ref('records/' + storageKey()).on('value', snap => {
             const val = snap.val();
             if (val && Array.isArray(val)) {
@@ -890,6 +892,7 @@
         currentMonth += delta;
         if (currentMonth > 12) { currentMonth = 1; currentYear++; }
         if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+        listenFirebaseRecords(); // 重新訂閱新月份
         renderAll();
     }
 
