@@ -516,8 +516,7 @@
             <span class="month-label month-picker" id="monthLabel" onclick="openMonthPicker()">2025年6月</span>
             <div id="monthPicker" class="month-picker-dropdown" style="display:none">
                 <div class="mp-quick-btns">
-                    <button class="mp-quick" onclick="mpQuick('thisMonth')">📅 本月</button>
-                    <button class="mp-quick" onclick="mpQuick('thisWeek')">📆 本週</button>
+                    <button class="mp-quick" onclick="mpQuick('thisWeek')">📆 本週</button> 
                     <button class="mp-quick" onclick="mpQuick('lastWeek')">📋 上週</button>
                 </div>
                 <div class="mp-year-nav">
@@ -543,7 +542,7 @@
 
         <!-- 線頭篩選 -->
         <div class="linehead-filter">
-            <span class="filter-label">線頭：</span>
+            <span class="filter-label">線頭:</span>
             <select id="lineheadFilterSel" onchange="setFilter(this.value)">
                 <option value="" selected>全部</option>
             </select>
@@ -581,7 +580,7 @@
             <div class="tab-btn" onclick="switchTab('conditions')">🎁 送房條件</div>
         </div>
 
-        <!-- 頁面：房費記錄 -->
+        <!-- 頁面:房費記錄 -->
         <div id="page-records" class="page">
             <div class="card">
                 <div class="card-title">📋 房費記錄</div>
@@ -605,7 +604,7 @@
                         <tbody id="recordsBody"></tbody>
                     </table>
                 </div>
-                <div class="empty-state" id="emptyRecords">尚無記錄，點擊「➕ 新增」添加</div>
+                <div class="empty-state" id="emptyRecords">尚無記錄,點擊「➕ 新增」添加</div>
             </div>
 
             <!-- 底部統計 -->
@@ -638,7 +637,7 @@
             </div>
         </div>
 
-        <!-- 頁面：新增記錄 -->
+        <!-- 頁面:新增記錄 -->
         <div id="page-add" class="page active">
             <div class="card">
                 <div class="card-title">➕ 新增房費記錄</div>
@@ -681,15 +680,15 @@
                         </select>
                     </div>
                     <div class="form-group full">
-                        <label>⚡ 明細（選擇後自動計算）</label>
+                        <label>⚡ 明細(選擇後自動計算)</label>
                         <input type="text" id="fDetail" placeholder="選擇酒店+房型+日期後自動填入">
                     </div>
                     <div class="form-group">
-                        <label>金額（自動計算）</label>
+                        <label>金額(自動計算)</label>
                         <input type="number" id="fAmount" placeholder="0">
                     </div>
                     <div class="form-group">
-                        <label>需洗碼量（自動計算）</label>
+                        <label>需洗碼量(自動計算)</label>
                         <input type="number" id="fNeedWash" placeholder="0">
                     </div>
                     <div class="form-group full">
@@ -701,7 +700,7 @@
             </div>
         </div>
 
-        <!-- 頁面：總覽 -->
+        <!-- 頁面:總覽 -->
         <div id="page-overview" class="page">
             <div class="card">
                 <div class="card-title">📊 按客戶彙總</div>
@@ -725,7 +724,7 @@
             </div>
         </div>
 
-        <!-- 頁面：送房條件 -->
+        <!-- 頁面:送房條件 -->
         <div id="page-conditions" class="page">
             <div class="card">
                 <div class="card-title">🎁 新濠系送房條件</div>
@@ -757,7 +756,7 @@
         <div class="modal-box">
             <h3>⚙️ 管理線頭</h3>
             <div style="display:flex;gap:6px;margin-bottom:12px;">
-                <input type="text" id="newLineHead" placeholder="新增線頭（如：馬）" style="flex:1;padding:7px 8px;border:1px solid rgba(255,215,0,0.2);border-radius:6px;background:rgba(255,255,255,0.05);color:#fff;font-size:0.85em;">
+                <input type="text" id="newLineHead" placeholder="新增線頭(如:馬)" style="flex:1;padding:7px 8px;border:1px solid rgba(255,215,0,0.2);border-radius:6px;background:rgba(255,255,255,0.05);color:#fff;font-size:0.85em;">
                 <button onclick="addLineHead()" style="padding:7px 12px;background:rgba(46,204,113,0.2);border:1px solid rgba(46,204,113,0.3);color:#2ecc71;border-radius:6px;cursor:pointer;">新增</button>
             </div>
             <div id="lineHeadList"></div>
@@ -840,13 +839,13 @@
         firebaseReady = true;
         console.log('✅ Firebase 連接成功');
     } catch(e) {
-        console.warn('⚠️ Firebase 連接失敗，使用離線模式:', e.message);
+        console.warn('⚠️ Firebase 連接失敗,使用離線模式:', e.message);
         firebaseReady = false;
     }
 
     // ========== 線頭管理 ==========
     let lineHeads = ['馬', '牛', '江', '杰'];
-    // currentEditIndex 已廢棄，改用 currentEditId
+    // currentEditIndex 已廢棄,改用 currentEditId
     let currentFilter = ''; // 空字串=全部
 
     function loadLineHeads() {
@@ -945,7 +944,7 @@
     }
 
     function delLineHead(index) {
-        if (!confirm(`確定刪除線頭「${lineHeads[index]}」？`)) return;
+        if (!confirm(`確定刪除線頭「${lineHeads[index]}」?`)) return;
         lineHeads.splice(index, 1);
         saveLineHeads();
         updateLineHeadSelect();
@@ -998,7 +997,7 @@
         }
     };
 
-    // ========== 儲存（統一存所有記錄，按入住日期篩選月份） ==========
+    // ========== 儲存(統一存所有記錄,按入住日期篩選月份) ==========
     const STORAGE_KEY = 'macau_rooms_all';
 
     function loadAllRecords() {
@@ -1080,7 +1079,7 @@
     }
 
     function saveRecords(records) {
-        // records 是當前月份篩選後的，需要合併回全部
+        // records 是當前月份篩選後的,需要合併回全部
         const all = loadAllRecords();
         const currentIds = new Set(records.map(r => r._id));
         // 保留非當月記錄
@@ -1314,7 +1313,7 @@
         document.getElementById('fHotel').value = '';
         document.getElementById('fRoomType').innerHTML = '<option value="">先選酒店</option>';
 
-        alert('✅ 已新增！');
+        alert('✅ 已新增!');
         renderAll();
     }
 
@@ -1397,7 +1396,7 @@
 
     // ========== 刪除記錄 ==========
     function delRecordById(_id) {
-        if (!confirm('確定刪除這筆記錄？')) return;
+        if (!confirm('確定刪除這筆記錄?')) return;
         const records = loadRecords();
         const idx = records.findIndex(r => r._id === _id);
         if (idx === -1) return alert('找不到記錄');
@@ -1455,7 +1454,7 @@
         saveRecords(records);
         closeEdit();
         renderAll();
-        alert('✅ 已更新！');
+        alert('✅ 已更新!');
     }
 
     // ========== 總覽 ==========
@@ -1545,7 +1544,7 @@
 
     // ========== 清空月份 ==========
     function clearMonth() {
-        if (!confirm(`確定清空 ${currentYear}年${currentMonth}月 所有記錄？`)) return;
+        if (!confirm(`確定清空 ${currentYear}年${currentMonth}月 所有記錄?`)) return;
         const all = loadAllRecords();
         const remaining = all.filter(r => {
             if (!r.checkIn) return true;
@@ -1557,7 +1556,7 @@
             db.ref('records/all').set(remaining).catch(e => console.warn('同步失敗:', e.message));
         }
         renderAll();
-        alert('✅ 已清空！');
+        alert('✅ 已清空!');
     }
 
     // ========== 初始化 ==========
