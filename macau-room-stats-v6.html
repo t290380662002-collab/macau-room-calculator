@@ -871,8 +871,8 @@
 
     // ========== 資料定義 ==========
     const specialDates = [];
-    let currentYear = 2025;
-    let currentMonth = 6;
+    let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth() + 1;
 
     const hotelData = {
         "摩珀斯": {
