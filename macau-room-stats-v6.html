@@ -869,12 +869,14 @@
         db.ref('records/' + storageKey()).off('value');
         db.ref('records/' + storageKey()).on('value', snap => {
             const val = snap.val();
+            isRemoteUpdate = true;
             if (val && Array.isArray(val)) {
-                isRemoteUpdate = true;
                 localStorage.setItem(storageKey(), JSON.stringify(val));
-                renderAll();
-                setTimeout(() => { isRemoteUpdate = false; }, 100);
+            } else {
+                localStorage.removeItem(storageKey());
             }
+            renderAll();
+            setTimeout(() => { isRemoteUpdate = false; }, 100);
         });
     }
 
