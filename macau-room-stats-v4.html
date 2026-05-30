@@ -426,7 +426,7 @@
                     </div>
                     <div class="form-group">
                         <label>酒店</label>
-                        <select id="fHotel" onchange="updateRoomTypes()">
+                        <select id="fHotel" onchange="updateRoomTypes();triggerAutoCalc();">
                             <option value="">選擇酒店</option>
                             <option value="摩珀斯">摩珀斯</option>
                             <option value="新濠天地">新濠天地</option>
@@ -444,28 +444,28 @@
                     </div>
                     <div class="form-group">
                         <label>入住日</label>
-                        <input type="date" id="fCheckIn">
+                        <input type="date" id="fCheckIn" onchange="triggerAutoCalc();">
                     </div>
                     <div class="form-group">
                         <label>退房日</label>
-                        <input type="date" id="fCheckOut">
+                        <input type="date" id="fCheckOut" onchange="triggerAutoCalc();">
                     </div>
                     <div class="form-group">
                         <label>房型</label>
-                        <select id="fRoomType">
+                        <select id="fRoomType" onchange="triggerAutoCalc();">
                             <option value="">先選酒店</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>明細（手動填寫）</label>
-                        <input type="text" id="fDetail" placeholder="如：平日1500×1+特殊2700×1">
+                    <div class="form-group full">
+                        <label>⚡ 明細（選擇後自動計算）</label>
+                        <input type="text" id="fDetail" placeholder="選擇酒店+房型+日期後自動填入">
                     </div>
                     <div class="form-group">
-                        <label>金額</label>
+                        <label>金額（自動計算）</label>
                         <input type="number" id="fAmount" placeholder="0">
                     </div>
                     <div class="form-group">
-                        <label>需洗碼量</label>
+                        <label>需洗碼量（自動計算）</label>
                         <input type="number" id="fNeedWash" placeholder="0">
                     </div>
                     <div class="form-group full">
@@ -474,46 +474,6 @@
                     </div>
                 </div>
                 <button class="btn-submit" onclick="addRecord()">提交</button>
-            </div>
-
-            <div class="card">
-                <div class="card-title">⚡ 快速自動計算</div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>酒店</label>
-                        <select id="aHotel" onchange="updateAutoRoomTypes()">
-                            <option value="">選擇酒店</option>
-                            <option value="摩珀斯">摩珀斯</option>
-                            <option value="新濠天地">新濠天地</option>
-                            <option value="新濠影匯">新濠影匯</option>
-                            <option value="新濠匯">新濠匯</option>
-                            <option value="康萊德">康萊德</option>
-                            <option value="倫敦人">倫敦人</option>
-                            <option value="威尼斯人">威尼斯人</option>
-                            <option value="四季名店">四季名店</option>
-                            <option value="名匯">名匯</option>
-                            <option value="御園">御園</option>
-                            <option value="萬豪">萬豪</option>
-                            <option value="頤居">頤居</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>房型</label>
-                        <select id="aRoomType">
-                            <option value="">先選酒店</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>入住日</label>
-                        <input type="date" id="aCheckIn">
-                    </div>
-                    <div class="form-group">
-                        <label>退房日</label>
-                        <input type="date" id="aCheckOut">
-                    </div>
-                </div>
-                <button class="btn-submit" style="background:linear-gradient(135deg,#4da6ff,#0077cc);" onclick="autoCalc()">自動計算金額與明細</button>
-                <div id="autoResult" style="margin-top:10px;font-size:0.85em;color:#aaa;"></div>
             </div>
         </div>
 
@@ -774,6 +734,7 @@
     function updateRoomTypes() {
         const hotel = document.getElementById('fHotel').value;
         const sel = document.getElementById('fRoomType');
+        const currentVal = sel.value;
         sel.innerHTML = '<option value="">選擇房型</option>';
         if (hotel && hotelData[hotel]) {
             hotelData[hotel].rooms.forEach(r => {
@@ -782,35 +743,23 @@
         }
     }
 
-    function updateAutoRoomTypes() {
-        const hotel = document.getElementById('aHotel').value;
-        const sel = document.getElementById('aRoomType');
-        sel.innerHTML = '<option value="">選擇房型</option>';
-        if (hotel && hotelData[hotel]) {
-            hotelData[hotel].rooms.forEach(r => {
-                sel.innerHTML += `<option value="${r.name}">${r.code} ${r.name}</option>`;
-            });
-        }
-    }
-
-    // ========== 自動計算 ==========
-    function autoCalc() {
-        const hotel = document.getElementById('aHotel').value;
-        const roomName = document.getElementById('aRoomType').value;
-        const checkIn = document.getElementById('aCheckIn').value;
-        const checkOut = document.getElementById('aCheckOut').value;
+    // ========== 自動計算（統一入口，選完即觸發）==========
+    function triggerAutoCalc() {
+        const hotel = document.getElementById('fHotel').value;
+        const roomName = document.getElementById('fRoomType').value;
+        const checkIn = document.getElementById('fCheckIn').value;
+        const checkOut = document.getElementById('fCheckOut').value;
 
         if (!hotel || !roomName || !checkIn || !checkOut) {
-            document.getElementById('autoResult').innerHTML = '<span style="color:#ff6b6b;">請填寫所有欄位</span>';
-            return;
+            return; // 等用戶填完再算
         }
 
         const room = hotelData[hotel]?.rooms.find(r => r.name === roomName);
-        if (!room) { document.getElementById('autoResult').innerHTML = '<span style="color:#ff6b6b;">找不到房型</span>'; return; }
+        if (!room) { return; }
 
         const start = new Date(checkIn);
         const end = new Date(checkOut);
-        if (end <= start) { document.getElementById('autoResult').innerHTML = '<span style="color:#ff6b6b;">退房日需晚於入住日</span>'; return; }
+        if (end <= start) { return; }
 
         let total = 0;
         let details = [];
@@ -843,25 +792,10 @@
         let totalNights = details.length;
         washNeed = room.wash * totalNights; // 萬
 
-        document.getElementById('autoResult').innerHTML =
-            `<div style="color:#ffd700;font-weight:bold;margin-bottom:6px;">計算結果：</div>` +
-            `<div>明細：${detailStr}</div>` +
-            `<div>金額：<span style="color:#ff6b6b;font-weight:bold;">${total.toLocaleString()}</span></div>` +
-            `<div>需洗碼量：<span style="color:#4da6ff;">${washNeed}萬</span></div>` +
-            `<button onclick="fillFromAuto('${detailStr}',${total},${washNeed})" style="margin-top:8px;padding:6px 12px;background:rgba(255,215,0,0.2);border:1px solid rgba(255,215,0,0.3);color:#ffd700;border-radius:6px;cursor:pointer;">填入表單 →</button>`;
-    }
-
-    function fillFromAuto(detail, amount, wash) {
-        document.getElementById('fHotel').value = document.getElementById('aHotel').value;
-        updateRoomTypes();
-        setTimeout(() => { document.getElementById('fRoomType').value = document.getElementById('aRoomType').value; }, 50);
-        document.getElementById('fCheckIn').value = document.getElementById('aCheckIn').value;
-        document.getElementById('fCheckOut').value = document.getElementById('aCheckOut').value;
-        document.getElementById('fDetail').value = detail;
-        document.getElementById('fAmount').value = amount;
-        document.getElementById('fNeedWash').value = wash;
-        switchTab('add');
-        document.querySelectorAll('.tab-btn')[1].click();
+        // 直接填入表單欄位
+        document.getElementById('fDetail').value = detailStr;
+        document.getElementById('fAmount').value = total;
+        document.getElementById('fNeedWash').value = washNeed;
     }
 
     // ========== 新增記錄 ==========
