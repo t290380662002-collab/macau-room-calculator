@@ -1020,13 +1020,46 @@
 
     // 根據入住日期篩選當前月份的記錄
     function loadRecords() {
-        // 將被日期篩選模式覆寫
         const all = loadAllRecords();
-        return all.filter(r => {
-            if (!r.checkIn) return false;
-            const d = new Date(r.checkIn);
-            return d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth;
-        });
+        if (dateMode === 'month') {
+            return all.filter(r => {
+                if (!r.checkIn) return false;
+                const d = new Date(r.checkIn);
+                return d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth;
+            });
+        }
+        if (dateMode === 'thisWeek') {
+            const now = new Date();
+            const day = now.getDay() || 7;
+            const mon = new Date(now); mon.setDate(now.getDate() - day + 1); mon.setHours(0,0,0,0);
+            const sun = new Date(mon); sun.setDate(mon.getDate() + 6); sun.setHours(23,59,59,999);
+            return all.filter(r => {
+                if (!r.checkIn) return false;
+                const d = new Date(r.checkIn);
+                return d >= mon && d <= sun;
+            });
+        }
+        if (dateMode === 'lastWeek') {
+            const now = new Date();
+            const day = now.getDay() || 7;
+            const lastMon = new Date(now); lastMon.setDate(now.getDate() - day - 6); lastMon.setHours(0,0,0,0);
+            const lastSun = new Date(lastMon); lastSun.setDate(lastMon.getDate() + 6); lastSun.setHours(23,59,59,999);
+            return all.filter(r => {
+                if (!r.checkIn) return false;
+                const d = new Date(r.checkIn);
+                return d >= lastMon && d <= lastSun;
+            });
+        }
+        if (dateMode === 'custom') {
+            const from = new Date(customDateFrom); from.setHours(0,0,0,0);
+            const to = new Date(customDateTo); to.setHours(23,59,59,999);
+            return all.filter(r => {
+                if (!r.checkIn) return false;
+                const d = new Date(r.checkIn);
+                return d >= from && d <= to;
+            });
+        }
+        return all;
     }
 
     // 監聽 Firebase 即時更新
@@ -1068,12 +1101,9 @@
     let customDateTo = '';
 
     function mpQuick(mode) {
-        dateMode = mode;
-        document.getElementById('monthPicker').style.display = 'none';
         if (mode === 'thisMonth') dateMode = 'month';
-        // 更新快速按鈕高亮
-        document.querySelectorAll('.mp-quick').forEach(b => b.classList.remove('mp-q-active'));
-        event.target.classList.add('mp-q-active');
+        else dateMode = mode;
+        document.getElementById('monthPicker').style.display = 'none';
         currentYear = new Date().getFullYear();
         currentMonth = new Date().getMonth() + 1;
         renderAll();
@@ -1090,54 +1120,23 @@
         renderAll();
     }
 
-    // 覆寫 loadRecords 以支援多種日期模式
-    const _origLoadRecords = loadRecords;
-    loadRecords = function() {
-        const all = loadAllRecords();
-        if (dateMode === 'month') {
-            return all.filter(r => {
-                if (!r.checkIn) return false;
-                const d = new Date(r.checkIn);
-                return d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth;
-            });
-        }
-        if (dateMode === 'thisWeek') {
-            const now = new Date();
-            const day = now.getDay() || 7; // 週一=1
-            const mon = new Date(now); mon.setDate(now.getDate() - day + 1); mon.setHours(0,0,0,0);
-            const sun = new Date(mon); sun.setDate(mon.getDate() + 6); sun.setHours(23,59,59,999);
-            return all.filter(r => {
-                if (!r.checkIn) return false;
-                const d = new Date(r.checkIn);
-                return d >= mon && d <= sun;
-            });
-        }
-        if (dateMode === 'lastWeek') {
-            const now = new Date();
-            const day = now.getDay() || 7;
-            const lastMon = new Date(now); lastMon.setDate(now.getDate() - day - 6); lastMon.setHours(0,0,0,0);
-            const lastSun = new Date(lastMon); lastSun.setDate(lastMon.getDate() + 6); lastSun.setHours(23,59,59,999);
-            return all.filter(r => {
-                if (!r.checkIn) return false;
-                const d = new Date(r.checkIn);
-                return d >= lastMon && d <= lastSun;
-            });
-        }
-        if (dateMode === 'custom') {
-            const from = new Date(customDateFrom); from.setHours(0,0,0,0);
-            const to = new Date(customDateTo); to.setHours(23,59,59,999);
-            return all.filter(r => {
-                if (!r.checkIn) return false;
-                const d = new Date(r.checkIn);
-                return d >= from && d <= to;
-            });
-        }
-        return all;
-    };
+    function mpSelect(m) {
+        dateMode = 'month';
+        currentYear = mpSelectedYear;
+        currentMonth = m;
+        document.getElementById('monthPicker').style.display = 'none';
+        renderAll();
+    }
 
-    // 更新月份標籤顯示
-    const _origUpdateMonthLabel = updateMonthLabel;
-    updateMonthLabel = function() {
+    function changeMonth(delta) {
+        dateMode = 'month';
+        currentMonth += delta;
+        if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+        if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+        renderAll();
+    }
+
+    function updateMonthLabel() {
         const el = document.getElementById('monthLabel');
         if (dateMode === 'month') {
             el.textContent = `${currentYear}年${currentMonth}月`;
@@ -1148,24 +1147,6 @@
         } else if (dateMode === 'custom') {
             el.textContent = customDateFrom + ' ~ ' + customDateTo;
         }
-    };
-
-    // 切換月份時重設為月份模式
-    const _origChangeMonth = changeMonth;
-    changeMonth = function(delta) {
-        dateMode = 'month';
-        currentMonth += delta;
-        if (currentMonth > 12) { currentMonth = 1; currentYear++; }
-        if (currentMonth < 1) { currentMonth = 12; currentYear--; }
-        renderAll();
-    };
-
-    function mpSelect(m) {
-        dateMode = 'month';
-        currentYear = mpSelectedYear;
-        currentMonth = m;
-        document.getElementById('monthPicker').style.display = 'none';
-        renderAll();
     }
 
     // ========== 原有月份選擇器 ==========
