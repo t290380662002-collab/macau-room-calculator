@@ -111,34 +111,6 @@
             color: #fff;
         }
         .btn-reset:hover { background: rgba(231,76,60,1); }
-        .result-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
-            gap: 10px;
-            margin-top: 12px;
-        }
-        .result-card { 
-            background: rgba(78,205,196,0.1); 
-            border: 1px solid rgba(78,205,196,0.3);
-            border-radius: 10px; 
-            padding: 12px 8px; 
-            text-align: center;
-        }
-        .result-label { color: #aaa; font-size: 0.75em; margin-bottom: 4px; }
-        .result-value { 
-            font-size: 1.3em; 
-            font-weight: bold;
-            color: #ffd700;
-        }
-        .formula { 
-            background: rgba(0,0,0,0.3); 
-            border-radius: 6px; 
-            padding: 8px; 
-            margin-top: 10px; 
-            font-family: monospace; 
-            color: #aaa; 
-            font-size: 0.8em;
-        }
         table { 
             width: 100%; 
             border-collapse: collapse; 
@@ -164,28 +136,6 @@
             color: #ff6b6b; 
             font-weight: bold;
         }
-        .summary-bar { 
-            display: flex; 
-            gap: 8px; 
-            flex-wrap: wrap;
-            margin-top: 14px;
-            padding: 10px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 8px;
-        }
-        .summary-item { 
-            flex: 1; 
-            min-width: 100px; 
-            text-align: center;
-        }
-        .summary-label { color: #aaa; font-size: 0.75em; }
-        .summary-value { 
-            color: #ffd700; 
-            font-size: 1.1em; 
-            font-weight: bold;
-        }
-        .page { display: none; }
-        .page.active { display: block; }
         
         /* 送房標準表格樣式 */
         .standard-table {
@@ -209,93 +159,42 @@
             background: rgba(241,196,15,0.3);
             color: #f1c40f;
         }
+        
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        .result-box {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+        .result-success {
+            background: rgba(46,204,113,0.2);
+            color: #2ecc71;
+        }
+        .result-warning {
+            background: rgba(241,196,15,0.2);
+            color: #f1c40f;
+        }
+        .result-error {
+            background: rgba(231,76,60,0.2);
+            color: #ff6b6b;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🏨 澳門酒店送房計算機</h1>
-        <p class="subtitle">洗碼量 • 送房標準 • 房間價格 • 達標計算</p>
+        <p class="subtitle">送房標準 • 房間價格 • 達標計算</p>
         
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('calc')">📊 洗碼計算</div>
-            <div class="tab" onclick="switchTab('standard')">🎁 送房標準</div>
+            <div class="tab active" onclick="switchTab('standard')">🎁 送房標準</div>
             <div class="tab" onclick="switchTab('prices')">💰 房間價格</div>
             <div class="tab" onclick="switchTab('target')">🎯 達標計算</div>
         </div>
         
-        <!-- 頁面1：洗碼計算 -->
-        <div id="page-calc" class="page active">
-            <div class="card">
-                <div class="card-title">📅 基本資料</div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>日期</label>
-                        <input type="date" id="date">
-                    </div>
-                    <div class="form-group">
-                        <label>廳別</label>
-                        <select id="hall">
-                            <option value="N">N廳 (2%)</option>
-                            <option value="H">H廳 (2.15%)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>代理名稱</label>
-                        <input type="text" id="agent" placeholder="請輸入代理名稱">
-                    </div>
-                    <div class="form-group">
-                        <label>佔成 (%)</label>
-                        <input type="number" id="share" placeholder="90" value="90" min="0" max="100">
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-title">💰 洗碼資料</div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>洗碼量 (HKD)</label>
-                        <input type="number" id="turnover" placeholder="1000000" value="1000000" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label>輸 (HKD)</label>
-                        <input type="number" id="loss" placeholder="0" value="0" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label>贏 (HKD)</label>
-                        <input type="number" id="win" placeholder="0" value="0" min="0">
-                    </div>
-                </div>
-                <div class="formula" id="formula">
-                    📐 公式：洗碼 / 92 × 佔成% × 2
-                </div>
-            </div>
-            
-            <button class="btn" onclick="calculate()">計算碼糧</button>
-            <button class="btn btn-reset" onclick="resetForm()">清除資料</button>
-            
-            <div class="result-grid" id="results" style="display:none;">
-                <div class="result-card">
-                    <div class="result-label">代理碼糧</div>
-                    <div class="result-value" id="agentResult">0</div>
-                </div>
-                <div class="result-card">
-                    <div class="result-label">公司碼糧</div>
-                    <div class="result-value" id="companyResult">0</div>
-                </div>
-                <div class="result-card">
-                    <div class="result-label">客人碼糧</div>
-                    <div class="result-value" id="guestResult">0</div>
-                </div>
-                <div class="result-card">
-                    <div class="result-label">淨結算 (佔成 <span id="shareDisplay">90</span>%)</div>
-                    <div class="result-value" id="netResult">0</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 頁面2：送房標準 -->
-        <div id="page-standard" class="page">
+        <!-- 頁面1：送房標準 -->
+        <div id="page-standard" class="page active">
             <div class="card">
                 <div class="card-title">🎁 各酒店送房標準</div>
                 <table class="standard-table">
@@ -337,7 +236,7 @@
             </div>
         </div>
         
-        <!-- 頁面3：房間價格 -->
+        <!-- 頁面2：房間價格 -->
         <div id="page-prices" class="page">
             <div class="card">
                 <div class="card-title">💰 各酒店房間價格表</div>
@@ -379,7 +278,7 @@
             </div>
         </div>
         
-        <!-- 頁面4：達標計算 -->
+        <!-- 頁面3：達標計算 -->
         <div id="page-target" class="page">
             <div class="card">
                 <div class="card-title">🎯 計算達標所需洗碼量</div>
@@ -492,8 +391,6 @@
             { hotel: "威尼斯人", room: "普通房", threshold: 500000, nights: 1, note: "平日適用" }
         ];
         
-        let history = [];
-        
         // ========== 頁面切換 ==========
         function switchTab(tabName) {
             // 隱藏所有頁面
@@ -509,87 +406,7 @@
             if (tabName === 'prices') loadPrices();
         }
         
-        // ========== 頁面1：洗碼計算 ==========
-        function getRate(hall) {
-            return hall === 'N' ? 2.0 : 2.15;
-        }
-        
-        function calculate() {
-            const date = document.getElementById('date').value;
-            const hall = document.getElementById('hall').value;
-            const agent = document.getElementById('agent').value;
-            const share = parseFloat(document.getElementById('share').value) || 90;
-            const turnover = parseFloat(document.getElementById('turnover').value) || 0;
-            const loss = parseFloat(document.getElementById('loss').value) || 0;
-            const win = parseFloat(document.getElementById('win').value) || 0;
-            
-            if (turnover === 0) {
-                alert('請輸入洗碼量');
-                return;
-            }
-            
-            // 計算公式：
-            // 代理碼糧 = 洗碼 / 92 × 佔成% × 2
-            // 公司碼糧 = 洗碼 / 92 × (92% - 佔成%) × 2
-            // 客人碼糧 = 洗碼 × 費率%
-            const rate = getRate(hall);
-            const agentCommission = Math.round(turnover / 92 * (share / 100) * 2);
-            const companyPercent = 92 - share;
-            const companyCommission = Math.round(turnover / 92 * (companyPercent / 100) * 2);
-            const guestCommission = turnover * (rate / 100);
-            const net = agentCommission - loss + win;
-            
-            // 顯示公式
-            document.getElementById('formula').innerHTML = 
-                '📐 代理：' + turnover.toLocaleString() + ' / 92 × ' + share + '% × 2 = ' + agentCommission.toLocaleString() + '<br>' +
-                '公司：' + turnover.toLocaleString() + ' / 92 × ' + companyPercent + '% × 2 = ' + companyCommission.toLocaleString() + '<br>' +
-                '客人：' + turnover.toLocaleString() + ' × ' + rate + '% = ' + guestCommission.toLocaleString();
-            
-            // 顯示結果
-            document.getElementById('results').style.display = 'grid';
-            document.getElementById('agentResult').textContent = agentCommission.toLocaleString();
-            document.getElementById('companyResult').textContent = companyCommission.toLocaleString();
-            document.getElementById('guestResult').textContent = guestCommission.toLocaleString();
-            document.getElementById('shareDisplay').textContent = share;
-            
-            const netEl = document.getElementById('netResult');
-            netEl.textContent = (net >= 0 ? '+' : '') + net.toLocaleString();
-            netEl.style.color = net >= 0 ? '#4ecdc4' : '#ff6b6b';
-            
-            // 保存記錄
-            const record = { 
-                date: date, 
-                hall: hall, 
-                agent: agent, 
-                share: share, 
-                turnover: turnover, 
-                agentCommission: agentCommission, 
-                companyCommission: companyCommission,
-                guestCommission: parseFloat(guestCommission.toFixed(1)), 
-                loss: loss, 
-                win: win, 
-                net: parseFloat(net.toFixed(1)) 
-            };
-            
-            history.unshift(record);
-            if (history.length > 50) history.pop();
-            
-            try {
-                localStorage.setItem('macaoCalcHistory', JSON.stringify(history));
-            } catch(e) {
-                console.error('Failed to save to localStorage:', e);
-            }
-        }
-        
-        function resetForm() {
-            document.getElementById('agent').value = '';
-            document.getElementById('turnover').value = '1000000';
-            document.getElementById('loss').value = '0';
-            document.getElementById('win').value = '0';
-            document.getElementById('results').style.display = 'none';
-        }
-        
-        // ========== 頁面2：送房標準 ==========
+        // ========== 頁面1：送房標準 ==========
         function loadStandards() {
             const tbody = document.getElementById('standardBody');
             let html = '';
@@ -621,12 +438,12 @@
             
             let html = '';
             if (results.length === 0) {
-                html = '<div style="padding:12px;background:rgba(231,76,60,0.2);border-radius:8px;margin-top:10px;">' +
-                    '<span style="color:#ff6b6b;">❌ 洗碼量 ' + turnover.toLocaleString() + ' HKD 未達任何送房標準</span>' +
+                html = '<div class="result-box result-error">' +
+                    '<span style="font-weight:bold;">❌ 洗碼量 ' + turnover.toLocaleString() + ' HKD 未達任何送房標準</span>' +
                 '</div>';
             } else {
-                html = '<div style="padding:12px;background:rgba(46,204,113,0.2);border-radius:8px;margin-top:10px;">' +
-                    '<span style="color:#2ecc71;font-weight:bold;">✅ 恭喜！符合以下送房資格：</span>' +
+                html = '<div class="result-box result-success">' +
+                    '<span style="font-weight:bold;">✅ 恭喜！符合以下送房資格：</span>' +
                     '<ul style="margin-top:8px;padding-left:20px;">';
                 results.forEach(r => {
                     html += '<li style="margin:6px 0;">' +
@@ -641,7 +458,7 @@
             document.getElementById('eligibilityResult').innerHTML = html;
         }
         
-        // ========== 頁面3：房間價格 ==========
+        // ========== 頁面2：房間價格 ==========
         function loadPrices() {
             filterPrices();
         }
@@ -676,16 +493,16 @@
                         '<td class="hotel-name">' + hotel + '</td>' +
                         '<td class="room-type">' + r.type + ' <span style="color:#aaa;font-size:0.8em;">(' + r.code + ')</span></td>' +
                         '<td class="price">' + weekdayDisplay + '</td>' +
-                        '<td class="price">' + weekendDisplay + '</td>' +
-                        '<td class="price">' + specialDisplay + '</td>' +
-                    '</tr>';
+                            '<td class="price">' + weekendDisplay + '</td>' +
+                                '<td class="price">' + specialDisplay + '</td>' +
+                            '</tr>';
                 });
             }
             
             tbody.innerHTML = html;
         }
         
-        // ========== 頁面4：達標計算 ==========
+        // ========== 頁面3：達標計算 ==========
         function calculateTarget() {
             const hotel = document.getElementById('targetHotel').value;
             const room = document.getElementById('targetRoom').value;
@@ -696,7 +513,7 @@
             const price = getRoomPrice(hotel, room, dateType);
             if (price === null) {
                 document.getElementById('targetResult').innerHTML = 
-                    '<div style="padding:12px;background:rgba(231,76,60,0.2);border-radius:8px;color:#ff6b6b;">找不到對應的房價資料</div>';
+                    '<div class="result-box result-error">找不到對應的房價資料</div>';
                 return;
             }
             
@@ -706,13 +523,13 @@
             // 這裡用一個簡化的計算方式，實際應該根據酒店的真實標準
             const requiredTurnover = totalCost * 500;
             
-            let html = '<div style="padding:12px;background:rgba(78,205,196,0.2);border-radius:8px;margin-top:10px;">' +
-                '<div style="font-weight:bold;color:#4ecdc4;margin-bottom:8px;">🎯 達標計算結果</div>' +
+            let html = '<div class="result-box result-success">' +
+                '<div style="font-weight:bold;margin-bottom:8px;">🎯 達標計算結果</div>' +
                 '<div><span class="hotel-name">' + hotel + '</span> - <span class="room-type">' + room + '</span></div>' +
                 '<div style="margin:8px 0;">' +
                     '<span style="color:#aaa;">房價：</span>' + price.toLocaleString() + ' HKD/晚<br>' +
                     '<span style="color:#aaa;">入住：</span>' + nights + ' 晚<br>' +
-                    '<span style="color:#aaa;">總費用：</span><span class="price">' + totalCost.toLocaleString() + ' HKD</span>' +
+                    '<span style="color:#aaa;">總費用電：</span><span class="price">' + totalCost.toLocaleString() + ' HKD</span>' +
                 '</div>' +
                 '<div style="padding:8px;background:rgba(255,215,0,0.1);border-radius:6px;margin-top:8px;">' +
                     '<span style="color:#ffd700;font-weight:bold;font-size:1.1em;">所需洗碼量：' + Math.round(requiredTurnover).toLocaleString() + ' HKD</span>' +
@@ -736,15 +553,15 @@
             const price = getRoomPrice(hotel, room, dateType);
             if (price === null) {
                 document.getElementById('nightsResult').innerHTML = 
-                    '<div style="padding:12px;background:rgba(231,76,60,0.2);border-radius:8px;color:#ff6b6b;">找不到對應的房價資料</div>';
+                    '<div class="result-box result-error">找不到對應的房價資料</div>';
                 return;
             }
             
             // 簡化計算：可住晚數 = 洗碼量 / (房價 × 500)
             const nightsCanStay = Math.floor(turnover / (price * 500));
             
-            let html = '<div style="padding:12px;background:rgba(46,204,113,0.2);border-radius:8px;margin-top:10px;">' +
-                '<div style="font-weight:bold;color:#2ecc71;margin-bottom:8px;">📊 可入住晚數計算</div>' +
+            let html = '<div class="result-box result-success">' +
+                '<div style="font-weight:bold;margin-bottom:8px;">📊 可入住晚數計算</div>' +
                 '<div><span class="hotel-name">' + hotel + '</span> - <span class="room-type">' + room + '</span> (' + 
                 (dateType === 'weekday' ? '平日' : dateType === 'weekend' ? '週末' : '特殊日') + ')</div>' +
                 '<div style="margin:8px 0;">' +
@@ -774,19 +591,8 @@
         
         // ========== 初始化 ==========
         window.onload = function() {
-            // 設定今天日期
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('date').value = today;
-            
-            // 載入歷史記錄
-            try {
-                const saved = localStorage.getItem('macaoCalcHistory');
-                if (saved) {
-                    history = JSON.parse(saved);
-                }
-            } catch(e) {
-                console.error('Failed to load from localStorage:', e);
-            }
+            // 預設載入送房標準
+            loadStandards();
         };
     </script>
 </body>
