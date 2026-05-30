@@ -1075,10 +1075,7 @@
         });
 
         const rate = totalNeed > 0 ? (totalActual / totalNeed * 100) : 0;
-        let dueAmount = 0;
-        if (rate < 100) {
-            dueAmount = totalAmount;
-        }
+        const dueAmount = rate >= 100 ? 0 : Math.round(totalAmount * (100 - rate) / 100);
 
         document.getElementById('sumAmount').textContent = totalAmount.toLocaleString();
         document.getElementById('sumNeed').textContent = totalNeed;
