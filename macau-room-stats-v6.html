@@ -689,7 +689,7 @@
 
     // ========== 線頭管理 ==========
     let lineHeads = ['馬', '牛', '江', '杰'];
-    let currentEditIndex = -1;
+    // currentEditIndex 已廢棄，改用 currentEditId
     let currentFilter = ''; // 空字串=全部
 
     function loadLineHeads() {
@@ -848,7 +848,19 @@
 
     function loadRecords() {
         const saved = localStorage.getItem(storageKey());
-        return saved ? JSON.parse(saved) : [];
+        let records = saved ? JSON.parse(saved) : [];
+        // 為舊記錄補上 _id
+        let changed = false;
+        records.forEach(r => {
+            if (!r._id) {
+                r._id = Date.now() + '_' + Math.random().toString(36).substr(2,6);
+                changed = true;
+            }
+        });
+        if (changed) {
+            localStorage.setItem(storageKey(), JSON.stringify(records));
+        }
+        return records;
     }
 
     // 監聽 Firebase 即時更新
@@ -993,7 +1005,8 @@
         }
 
         const records = loadRecords();
-        records.push({ lineHead, name, hotel, checkIn, checkOut, roomType, detail, amount, needWash, actualWash });
+        const _id = Date.now() + '_' + Math.random().toString(36).substr(2,6);
+        records.push({ _id, lineHead, name, hotel, checkIn, checkOut, roomType, detail, amount, needWash, actualWash });
         saveRecords(records);
 
         document.getElementById('fLineHead').value = lineHead;
@@ -1026,8 +1039,6 @@
         const filtered = getFilteredRecords();
         let html = '';
         filtered.forEach((r) => {
-            // 找到在原始 records 中的 index
-            const origIdx = records.indexOf(r);
             const ci = r.checkIn ? r.checkIn.slice(5).replace('-','/') : '';
             const co = r.checkOut ? r.checkOut.slice(5).replace('-','/') : '';
             html += `<tr>
@@ -1042,8 +1053,8 @@
                 <td class="col-need">${r.needWash}</td>
                 <td class="col-actual">${r.actualWash}</td>
                 <td>
-                    <button class="op-btn op-edit" onclick="openEdit(${origIdx})">✏️</button>
-                    <button class="op-btn op-del" onclick="delRecord(${origIdx})">🗑️</button>
+                    <button class="op-btn op-edit" onclick="openEditById('${r._id}')">✏️</button>
+                    <button class="op-btn op-del" onclick="delRecordById('${r._id}')">🗑️</button>
                 </td>
             </tr>`;
         });
@@ -1083,20 +1094,29 @@
         rateEl.style.color = rate >= 100 ? '#2ecc71' : (rate >= 80 ? '#f1c40f' : '#ff4d4d');
     }
 
+    function findRecordIndex(_id) {
+        const records = loadRecords();
+        return records.findIndex(r => r._id === _id);
+    }
+
     // ========== 刪除記錄 ==========
-    function delRecord(index) {
+    function delRecordById(_id) {
         if (!confirm('確定刪除這筆記錄？')) return;
         const records = loadRecords();
-        records.splice(index, 1);
+        const idx = records.findIndex(r => r._id === _id);
+        if (idx === -1) return alert('找不到記錄');
+        records.splice(idx, 1);
         saveRecords(records);
         renderAll();
     }
 
     // ========== 編輯記錄 ==========
-    function openEdit(index) {
+    let currentEditId = '';
+    function openEditById(_id) {
         const records = loadRecords();
-        const r = records[index];
-        currentEditIndex = index;
+        const r = records.find(r => r._id === _id);
+        if (!r) return alert('找不到記錄');
+        currentEditId = _id;
 
         document.getElementById('eLineHead').value = r.lineHead || '';
         document.getElementById('eName').value = r.name;
@@ -1114,14 +1134,16 @@
 
     function closeEdit() {
         document.getElementById('editModal').classList.remove('show');
-        currentEditIndex = -1;
+        currentEditId = '';
     }
 
     function saveEdit() {
         const records = loadRecords();
-        if (currentEditIndex < 0 || currentEditIndex >= records.length) return;
+        const idx = records.findIndex(r => r._id === currentEditId);
+        if (idx === -1) return alert('找不到記錄');
 
-        records[currentEditIndex] = {
+        records[idx] = {
+            _id: currentEditId,
             lineHead: document.getElementById('eLineHead').value.trim(),
             name: document.getElementById('eName').value.trim(),
             hotel: document.getElementById('eHotel').value,
