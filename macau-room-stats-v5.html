@@ -535,7 +535,7 @@
                 <div class="table-wrap">
                     <table>
                         <thead>
-                            <tr><th>酒店</th><th>Code</th><th>房型</th><th>平日</th><th>週五/六</th><th>Premium</th><th>洗碼量</th></tr>
+                            <tr><th>酒店</th><th>Code</th><th>房型</th><th>平日</th><th>週五/六</th><th>特殊日</th><th>洗碼量</th></tr>
                         </thead>
                         <tbody id="condMelco"></tbody>
                     </table>
@@ -546,7 +546,7 @@
                 <div class="table-wrap">
                     <table>
                         <thead>
-                            <tr><th>酒店</th><th>Code</th><th>房型</th><th>平日</th><th>週五/六</th><th>特殊</th><th>洗碼量</th></tr>
+                            <tr><th>酒店</th><th>Code</th><th>房型</th><th>平日</th><th>週五/六</th><th>特殊日</th><th>洗碼量</th></tr>
                         </thead>
                         <tbody id="condSands"></tbody>
                     </table>
@@ -781,7 +781,7 @@
     function getDateTypeLabel(type) {
         if (type === 'weekday') return '平日';
         if (type === 'weekend') return '週末';
-        return '特殊';
+        return '特殊日';
     }
 
     // ========== 房型下拉更新 ==========
