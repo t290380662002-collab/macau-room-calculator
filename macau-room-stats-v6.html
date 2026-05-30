@@ -73,6 +73,7 @@
             justify-content: center;
             gap: 16px;
             margin-bottom: 14px;
+            position: relative;
         }
         .month-nav button {
             background: rgba(255,215,0,0.15);
@@ -87,6 +88,70 @@
         .month-nav .month-label {
             color: #fff;
             font-size: 1.1em;
+            font-weight: bold;
+        }
+        .month-nav .month-picker {
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .month-nav .month-picker:hover {
+            background: rgba(255,215,0,0.2);
+        }
+        .month-picker-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 12px;
+            z-index: 100;
+            min-width: 220px;
+        }
+        .mp-year-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .mp-year-nav button {
+            background: rgba(255,215,0,0.2);
+            border: none;
+            color: #fff;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .mp-months {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+        .mp-months span {
+            text-align: center;
+            padding: 6px 4px;
+            border-radius: 6px;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.15s;
+        }
+        .mp-months span:hover {
+            background: rgba(255,215,0,0.2);
+            color: #fff;
+        }
+        .mp-months span.mp-active {
+            background: #d4af37;
+            color: #000;
             font-weight: bold;
         }
 
@@ -379,7 +444,17 @@
         <!-- 月份導航 -->
         <div class="month-nav">
             <button onclick="changeMonth(-1)">◀</button>
-            <span class="month-label" id="monthLabel">2025年6月</span>
+            <span class="month-label month-picker" id="monthLabel" onclick="openMonthPicker()">2025年6月</span>
+            <div id="monthPicker" class="month-picker-dropdown" style="display:none">
+                <div class="mp-year-nav">
+                    <button onclick="mpYear(-1)">◀</button>
+                    <span id="mpYearLabel">2026</span>
+                    <button onclick="mpYear(1)">▶</button>
+                </div>
+                <div class="mp-months">
+                    <span onclick="mpSelect(1)">1月</span><span onclick="mpSelect(2)">2月</span><span onclick="mpSelect(3)">3月</span><span onclick="mpSelect(4)">4月</span><span onclick="mpSelect(5)">5月</span><span onclick="mpSelect(6)">6月</span><span onclick="mpSelect(7)">7月</span><span onclick="mpSelect(8)">8月</span><span onclick="mpSelect(9)">9月</span><span onclick="mpSelect(10)">10月</span><span onclick="mpSelect(11)">11月</span><span onclick="mpSelect(12)">12月</span>
+                </div>
+            </div>
             <button onclick="changeMonth(1)">▶</button>
         </div>
 
@@ -902,7 +977,49 @@
         }
     }
 
-    // ========== 月份 ==========
+    // ========== 月份選擇器 ==========
+    let mpSelectedYear = currentYear;
+
+    function openMonthPicker() {
+        const el = document.getElementById('monthPicker');
+        mpSelectedYear = currentYear;
+        renderMonthPicker();
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function mpYear(delta) {
+        mpSelectedYear += delta;
+        renderMonthPicker();
+    }
+
+    function mpSelect(m) {
+        currentYear = mpSelectedYear;
+        currentMonth = m;
+        document.getElementById('monthPicker').style.display = 'none';
+        renderAll();
+    }
+
+    function renderMonthPicker() {
+        document.getElementById('mpYearLabel').textContent = mpSelectedYear;
+        document.querySelectorAll('#monthPicker .mp-months span').forEach((el, i) => {
+            const m = i + 1;
+            if (mpSelectedYear === currentYear && m === currentMonth) {
+                el.classList.add('mp-active');
+            } else {
+                el.classList.remove('mp-active');
+            }
+        });
+    }
+
+    // 點擊外部關閉
+    document.addEventListener('click', e => {
+        const picker = document.getElementById('monthPicker');
+        const label = document.getElementById('monthLabel');
+        if (picker && !picker.contains(e.target) && e.target !== label) {
+            picker.style.display = 'none';
+        }
+    });
+
     function changeMonth(delta) {
         currentMonth += delta;
         if (currentMonth > 12) { currentMonth = 1; currentYear++; }
