@@ -840,13 +840,11 @@
         }
     };
 
-    // ========== 儲存 ==========
-    function storageKey() {
-        return `macau_rooms_${currentYear}_${currentMonth}`;
-    }
+    // ========== 儲存（統一存所有記錄，按入住日期篩選月份） ==========
+    const STORAGE_KEY = 'macau_rooms_all';
 
-    function loadRecords() {
-        const saved = localStorage.getItem(storageKey());
+    function loadAllRecords() {
+        const saved = localStorage.getItem(STORAGE_KEY);
         let records = saved ? JSON.parse(saved) : [];
         // 為舊記錄補上 _id
         let changed = false;
@@ -857,23 +855,32 @@
             }
         });
         if (changed) {
-            localStorage.setItem(storageKey(), JSON.stringify(records));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
         }
         return records;
+    }
+
+    // 根據入住日期篩選當前月份的記錄
+    function loadRecords() {
+        const all = loadAllRecords();
+        return all.filter(r => {
+            if (!r.checkIn) return false;
+            const d = new Date(r.checkIn);
+            return d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth;
+        });
     }
 
     // 監聽 Firebase 即時更新
     function listenFirebaseRecords() {
         if (!firebaseReady || !db) return;
-        // 先取消舊的監聽（通過 off()）
-        db.ref('records/' + storageKey()).off('value');
-        db.ref('records/' + storageKey()).on('value', snap => {
+        db.ref('records/all').off('value');
+        db.ref('records/all').on('value', snap => {
             const val = snap.val();
             isRemoteUpdate = true;
             if (val && Array.isArray(val)) {
-                localStorage.setItem(storageKey(), JSON.stringify(val));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(val));
             } else {
-                localStorage.removeItem(storageKey());
+                localStorage.removeItem(STORAGE_KEY);
             }
             renderAll();
             setTimeout(() => { isRemoteUpdate = false; }, 100);
@@ -881,10 +888,16 @@
     }
 
     function saveRecords(records) {
-        localStorage.setItem(storageKey(), JSON.stringify(records));
+        // records 是當前月份篩選後的，需要合併回全部
+        const all = loadAllRecords();
+        const currentIds = new Set(records.map(r => r._id));
+        // 保留非當月記錄
+        const otherMonths = all.filter(r => !currentIds.has(r._id));
+        const merged = [...otherMonths, ...records];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
         // 同步到 Firebase
         if (firebaseReady && db && !isRemoteUpdate) {
-            db.ref('records/' + storageKey()).set(records)
+            db.ref('records/all').set(merged)
                 .catch(e => console.warn('同步記錄失敗:', e.message));
         }
     }
@@ -894,7 +907,6 @@
         currentMonth += delta;
         if (currentMonth > 12) { currentMonth = 1; currentYear++; }
         if (currentMonth < 1) { currentMonth = 12; currentYear--; }
-        listenFirebaseRecords(); // 重新訂閱新月份
         renderAll();
     }
 
@@ -1251,7 +1263,16 @@
     // ========== 清空月份 ==========
     function clearMonth() {
         if (!confirm(`確定清空 ${currentYear}年${currentMonth}月 所有記錄？`)) return;
-        localStorage.removeItem(storageKey());
+        const all = loadAllRecords();
+        const remaining = all.filter(r => {
+            if (!r.checkIn) return true;
+            const d = new Date(r.checkIn);
+            return !(d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth);
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(remaining));
+        if (firebaseReady && db) {
+            db.ref('records/all').set(remaining).catch(e => console.warn('同步失敗:', e.message));
+        }
         renderAll();
         alert('✅ 已清空！');
     }
