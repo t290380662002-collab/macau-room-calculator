@@ -41,35 +41,29 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
             margin-bottom: 12px;
-            flex-wrap: wrap;
         }
         .linehead-filter .filter-label {
             color: #888;
-            font-size: 0.8em;
-            margin-right: 4px;
+            font-size: 0.85em;
         }
-        .lh-filter-btn {
+        .linehead-filter select {
             padding: 5px 12px;
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 16px;
-            background: rgba(255,255,255,0.04);
-            color: #aaa;
-            cursor: pointer;
-            font-size: 0.8em;
-            transition: all 0.2s;
-        }
-        .lh-filter-btn.active {
-            background: rgba(77,166,255,0.2);
-            border-color: rgba(77,166,255,0.5);
-            color: #4da6ff;
-            font-weight: bold;
-        }
-        .lh-filter-btn.all-btn.active {
-            background: rgba(255,215,0,0.15);
-            border-color: rgba(255,215,0,0.4);
+            border: 1px solid rgba(255,215,0,0.3);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.06);
             color: #ffd700;
+            font-size: 0.85em;
+            outline: none;
+            min-width: 100px;
+        }
+        .linehead-filter select:focus {
+            border-color: #ffd700;
+        }
+        .linehead-filter select option {
+            background: #1a1a2e;
+            color: #e0e0e0;
         }
 
         /* 月份切換 */
@@ -391,9 +385,11 @@
         </div>
 
         <!-- 線頭篩選 -->
-        <div class="linehead-filter" id="lineheadFilter">
+        <div class="linehead-filter">
             <span class="filter-label">線頭：</span>
-            <button class="lh-filter-btn all-btn active" onclick="setFilter('')">全部</button>
+            <select id="lineheadFilterSel" onchange="setFilter(this.value)">
+                <option value="" selected>全部</option>
+            </select>
         </div>
 
         <!-- 統計卡片 -->
@@ -735,14 +731,14 @@
     }
 
     function renderFilterButtons() {
-        const container = document.getElementById('lineheadFilter');
-        if (!container) return;
-        let html = '<span class="filter-label">線頭：</span>';
-        html += `<button class="lh-filter-btn all-btn ${currentFilter===''?'active':''}" onclick="setFilter('')">全部</button>`;
+        const sel = document.getElementById('lineheadFilterSel');
+        if (!sel) return;
+        const prevVal = sel.value;
+        sel.innerHTML = '<option value=""' + (currentFilter===''?' selected':'') + '>全部</option>';
         lineHeads.forEach(lh => {
-            html += `<button class="lh-filter-btn ${currentFilter===lh?'active':''}" onclick="setFilter('${lh}')">${lh}</button>`;
+            sel.innerHTML += '<option value="' + lh + '"' + (currentFilter===lh?' selected':'') + '>' + lh + '</option>';
         });
-        container.innerHTML = html;
+        sel.value = prevVal || currentFilter;
     }
 
     function setFilter(lh) {
