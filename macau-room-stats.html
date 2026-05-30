@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳門房費統計表</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .month-selector select {
+            padding: 10px 15px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tbody tr:hover {
+            background: #f5f5f5;
+        }
+
+        tbody tr.editing {
+            background: #fff3cd;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .stats {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .total-row {
+            background: #e7f3ff;
+            font-weight: bold;
+        }
+
+        .total-row td {
+            padding: 15px;
+            font-size: 16px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .delete-confirm {
+            text-align: center;
+        }
+
+        .delete-confirm p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏨 澳門房費統計表</h1>
+            <p>記錄與管理澳門酒店住宿費用與洗碼量統計</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="showAddModal()">
+                <span>➕</span> 新增記錄
+            </button>
+            <button class="btn btn-success" onclick="exportToExcel()">
+                <span>📊</span> 匯出 Excel
+            </button>
+            <button class="btn btn-danger" onclick="clearAllData()">
+                <span>🗑️</span> 清空全部
+            </button>
+            <div class="month-selector">
+                <label>選擇月份：</label>
+                <select id="monthSelect" onchange="loadMonthData()">
+                    <option value="2026-05">2026年5月</option>
+                    <option value="2026-06" selected>2026年6月</option>
+                    <option value="2026-07">2026年7月</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="statsTable">
+                <thead>
+                    <tr>
+                        <th>帳項</th>
+                        <th>入住日期</th>
+                        <th>退房日期</th>
+                        <th>酒店/房號</th>
+                        <th>明細</th>
+                        <th>金額 (HKD)</th>
+                        <th>應房客洗碼量</th>
+                        <th>實際洗碼量</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- 動態內容 -->
+                </tbody>
+                <tfoot id="tableFooter">
+                    <!-- 統計行 -->
+                </tfoot>
+            </table>
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">📭</div>
+                <p>尚無記錄，點擊「新增記錄」開始</p>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="label">訂房費總額</div>
+                    <div class="value" id="totalRoomFee">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">客洗碼數</div>
+                    <div class="value" id="totalGuestCode">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">總洗碼數</div>
+                    <div class="value" id="totalCode">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">達標率</div>
+                    <div class="value" id="achievementRate">0%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增/編輯模態框 -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">新增記錄</div>
+            <form id="addForm">
+                <div class="form-group">
+                    <label>帳項 *</label>
+                    <input type="text" id="addAccount" required>
+                </div>
+                <div class="form-group">
+                    <label>入住日期 *</label>
+                    <input type="date" id="addCheckIn" required>
+                </div>
+                <div class="form-group">
+                    <label>退房日期 *</label>
+                    <input type="date" id="addCheckOut" required>
+                </div>
+                <div class="form-group">
+                    <label>酒店/房號 *</label>
+                    <input type="text" id="addHotel" placeholder="例：威尼斯人-大套" required>
+                </div>
+                <div class="form-group">
+                    <label>明細</label>
+                    <textarea id="addDetails" placeholder="例：平日×3晚×1800 + 假日×2晚×2200"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>金額 (HKD) *</label>
+                    <input type="number" id="addAmount" min="0" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label>應房客洗碼量</label>
+                    <input type="number" id="addRequiredCode" min="0" step="1" value="0">
+                </div>
+                <div class="form-group">
+                    <label>實際洗碼量</label>
+                    <input type="number" id="addActualCode" min="0" step="1" value="0">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-warning" onclick="hideAddModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 編輯模態框 -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">編輯記錄</div>
+            <form id="editForm">
+                <input type="hidden" id="editIndex">
+                <div class="form-group">
+                    <label>帳項 *</label>
+                    <input type="text" id="editAccount" required>
+                </div>
+                <div class="form-group">
+                    <label>入住日期 *</label>
+                    <input type="date" id="editCheckIn" required>
+                </div>
+                <div class="form-group">
+                    <label>退房日期 *</label>
+                    <input type="date" id="editCheckOut" required>
+                </div>
+                <div class="form-group">
+                    <label>酒店/房號 *</label>
+                    <input type="text" id="editHotel" required>
+                </div>
+                <div class="form-group">
+                    <label>明細</label>
+                    <textarea id="editDetails"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>金額 (HKD) *</label>
+                    <input type="number" id="editAmount" min="0" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label>應房客洗碼量</label>
+                    <input type="number" id="editRequiredCode" min="0" step="1" value="0">
+                </div>
+                <div class="form-group">
+                    <label>實際洗碼量</label>
+                    <input type="number" id="editActualCode" min="0" step="1" value="0">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-warning" onclick="hideEditModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">更新</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 刪除確認模態框 -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">確認刪除</div>
+            <div class="delete-confirm">
+                <p>確定要刪除這條記錄嗎？</p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-warning" onclick="hideDeleteModal()">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">刪除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+        // 資料儲存
+        let currentMonth = '2026-06';
+        let records = [];
+        let deleteIndex = -1;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMonthData();
+        });
+
+        // 月份選擇變更
+        function loadMonthData() {
+            currentMonth = document.getElementById('monthSelect').value;
+            loadData();
+            renderTable();
+            updateStats();
+        }
+
+        // 載入資料
+        function loadData() {
+            const data = localStorage.getItem(`macauRoomStats_${currentMonth}`);
+            records = data ? JSON.parse(data) : [];
+        }
+
+        // 儲存資料
+        function saveData() {
+            localStorage.setItem(`macauRoomStats_${currentMonth}`, JSON.stringify(records));
+        }
+
+        // 渲染表格
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (records.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+                tbody.innerHTML = records.map((record, index) => `
+                    <tr>
+                        <td>${record.account}</td>
+                        <td>${record.checkIn}</td>
+                        <td>${record.checkOut}</td>
+                        <td>${record.hotel}</td>
+                        <td>${record.details || '-'}</td>
+                        <td style="text-align: right;">${formatNumber(record.amount)}</td>
+                        <td style="text-align: right;">${formatNumber(record.requiredCode)}</td>
+                        <td style="text-align: right;">${formatNumber(record.actualCode)}</td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn btn-primary btn-sm" onclick="showEditModal(${index})">✏️</button>
+                                <button class="btn btn-danger btn-sm" onclick="showDeleteModal(${index})">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            updateFooter();
+        }
+
+        // 更新表格底部統計
+        function updateFooter() {
+            const tfoot = document.getElementById('tableFooter');
+            const totalAmount = records.reduce((sum, r) => sum + (r.amount || 0), 0);
+            const totalRequired = records.reduce((sum, r) => sum + (r.requiredCode || 0), 0);
+            const totalActual = records.reduce((sum, r) => sum + (r.actualCode || 0), 0);
+            
+            tfoot.innerHTML = `
+                <tr class="total-row">
+                    <td>總計</td>
+                    <td colspan="4"></td>
+                    <td style="text-align: right;">${formatNumber(totalAmount)}</td>
+                    <td style="text-align: right;">${formatNumber(totalRequired)}</td>
+                    <td style="text-align: right;">${formatNumber(totalActual)}</td>
+                    <td></td>
+                </tr>
+            `;
+        }
+
+        // 更新統計卡片
+        function updateStats() {
+            const totalAmount = records.reduce((sum, r) => sum + (r.amount || 0), 0);
+            const totalRequired = records.reduce((sum, r) => sum + (r.requiredCode || 0), 0);
+            const totalActual = records.reduce((sum, r) => sum + (r.actualCode || 0), 0);
+            const rate = totalRequired > 0 ? (totalActual / totalRequired * 100).toFixed(1) : 0;
+            
+            document.getElementById('totalRoomFee').textContent = formatNumber(totalAmount);
+            document.getElementById('totalGuestCode').textContent = formatNumber(totalRequired);
+            document.getElementById('totalCode').textContent = formatNumber(totalActual);
+            document.getElementById('achievementRate').textContent = rate + '%';
+        }
+
+        // 格式化數字（加上逗號）
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // 顯示新增模態框
+        function showAddModal() {
+            document.getElementById('addForm').reset();
+            document.getElementById('addModal').classList.add('active');
+        }
+
+        // 隱藏新增模態框
+        function hideAddModal() {
+            document.getElementById('addModal').classList.remove('active');
+        }
+
+        // 顯示編輯模態框
+        function showEditModal(index) {
+            const record = records[index];
+            document.getElementById('editIndex').value = index;
+            document.getElementById('editAccount').value = record.account;
+            document.getElementById('editCheckIn').value = record.checkIn;
+            document.getElementById('editCheckOut').value = record.checkOut;
+            document.getElementById('editHotel').value = record.hotel;
+            document.getElementById('editDetails').value = record.details || '';
+            document.getElementById('editAmount').value = record.amount;
+            document.getElementById('editRequiredCode').value = record.requiredCode || 0;
+            document.getElementById('editActualCode').value = record.actualCode || 0;
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        // 隱藏編輯模態框
+        function hideEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        // 顯示刪除模態框
+        function showDeleteModal(index) {
+            deleteIndex = index;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        // 隱藏刪除模態框
+        function hideDeleteModal() {
+            deleteIndex = -1;
+            document.getElementById('deleteModal').classList.remove('active');
+        }
+
+        // 確認刪除
+        function confirmDelete() {
+            if (deleteIndex >= 0) {
+                records.splice(deleteIndex, 1);
+                saveData();
+                renderTable();
+                updateStats();
+                hideDeleteModal();
+            }
+        }
+
+        // 新增表單提交
+        document.getElementById('addForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const record = {
+                account: document.getElementById('addAccount').value,
+                checkIn: document.getElementById('addCheckIn').value,
+                checkOut: document.getElementById('addCheckOut').value,
+                hotel: document.getElementById('addHotel').value,
+                details: document.getElementById('addDetails').value,
+                amount: parseInt(document.getElementById('addAmount').value) || 0,
+                requiredCode: parseInt(document.getElementById('addRequiredCode').value) || 0,
+                actualCode: parseInt(document.getElementById('addActualCode').value) || 0
+            };
+            
+            records.push(record);
+            saveData();
+            renderTable();
+            updateStats();
+            hideAddModal();
+        });
+
+        // 編輯表單提交
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const index = parseInt(document.getElementById('editIndex').value);
+            records[index] = {
+                account: document.getElementById('editAccount').value,
+                checkIn: document.getElementById('editCheckIn').value,
+                checkOut: document.getElementById('editCheckOut').value,
+                hotel: document.getElementById('editHotel').value,
+                details: document.getElementById('editDetails').value,
+                amount: parseInt(document.getElementById('editAmount').value) || 0,
+                requiredCode: parseInt(document.getElementById('editRequiredCode').value) || 0,
+                actualCode: parseInt(document.getElementById('editActualCode').value) || 0
+            };
+            
+            saveData();
+            renderTable();
+            updateStats();
+            hideEditModal();
+        });
+
+        // 匯出 Excel
+        function exportToExcel() {
+            if (records.length === 0) {
+                alert('沒有資料可以匯出');
+                return;
+            }
+            
+            // 準備資料
+            const exportData = records.map(r => ({
+                '帳項': r.account,
+                '入住日期': r.checkIn,
+                '退房日期': r.checkOut,
+                '酒店/房號': r.hotel,
+                '明細': r.details || '',
+                '金額 (HKD)': r.amount,
+                '應房客洗碼量': r.requiredCode || 0,
+                '實際洗碼量': r.actualCode || 0
+            }));
+            
+            // 加入總計行
+            const totalAmount = records.reduce((sum, r) => sum + (r.amount || 0), 0);
+            const totalRequired = records.reduce((sum, r) => sum + (r.requiredCode || 0), 0);
+            const totalActual = records.reduce((sum, r) => sum + (r.actualCode || 0), 0);
+            const rate = totalRequired > 0 ? (totalActual / totalRequired * 100).toFixed(1) : 0;
+            
+            exportData.push({
+                '帳項': '總計',
+                '入住日期': '',
+                '退房日期': '',
+                '酒店/房號': '',
+                '明細': '',
+                '金額 (HKD)': totalAmount,
+                '應房客洗碼量': totalRequired,
+                '實際洗碼量': totalActual
+            });
+            
+            // 建立工作表
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '房費統計');
+            
+            // 匯出
+            const fileName = `澳門房費統計_${currentMonth}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        // 清空全部資料
+        function clearAllData() {
+            if (confirm('確定要清空所有記錄嗎？此操作不可恢復！')) {
+                records = [];
+                saveData();
+                renderTable();
+                updateStats();
+            }
+        }
+    </script>
+</body>
+</html>
