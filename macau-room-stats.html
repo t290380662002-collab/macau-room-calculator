@@ -333,7 +333,7 @@
             <table id="statsTable">
                 <thead>
                     <tr>
-                        <th>帳項</th>
+                        <th>線頭</th>
                         <th>入住日期</th>
                         <th>退房日期</th>
                         <th>酒店/房號</th>
@@ -385,7 +385,7 @@
             <div class="modal-header">新增記錄</div>
             <form id="addForm">
                 <div class="form-group">
-                    <label>帳項 *</label>
+                    <label>線頭 *</label>
                     <input type="text" id="addAccount" required>
                 </div>
                 <div class="form-group">
@@ -431,7 +431,7 @@
             <form id="editForm">
                 <input type="hidden" id="editIndex">
                 <div class="form-group">
-                    <label>帳項 *</label>
+                    <label>線頭 *</label>
                     <input type="text" id="editAccount" required>
                 </div>
                 <div class="form-group">
@@ -692,7 +692,7 @@
             
             // 準備資料
             const exportData = records.map(r => ({
-                '帳項': r.account,
+                '線頭': r.account,
                 '入住日期': r.checkIn,
                 '退房日期': r.checkOut,
                 '酒店/房號': r.hotel,
@@ -709,7 +709,7 @@
             const rate = totalRequired > 0 ? (totalActual / totalRequired * 100).toFixed(1) : 0;
             
             exportData.push({
-                '帳項': '總計',
+                '線頭': '總計',
                 '入住日期': '',
                 '退房日期': '',
                 '酒店/房號': '',
