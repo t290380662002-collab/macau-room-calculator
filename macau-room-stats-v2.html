@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳門酒店房費統計系統 v2.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .nav-tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            font-weight: bold;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+        }
+
+        .nav-tab.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .month-selector select {
+            padding: 10px 15px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tbody tr:hover {
+            background: #f5f5f5;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .stats {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .total-row {
+            background: #e7f3ff;
+            font-weight: bold;
+        }
+
+        .total-row td {
+            padding: 15px;
+            font-size: 16px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .delete-confirm {
+            text-align: center;
+        }
+
+        .delete-confirm p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        /* 查詢頁面樣式 */
+        .query-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .query-section h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .query-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .price-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .price-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .price-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .price-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        /* 計算機樣式 */
+        .calculator-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .calculator-section h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .calc-result {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .calc-result h4 {
+            margin-bottom: 15px;
+        }
+
+        .calc-result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .calc-result-item .label {
+            opacity: 0.9;
+        }
+
+        .calc-result-item .value {
+            font-weight: bold;
+        }
+
+        /* 自動計算提示 */
+        .auto-calc-hint {
+            background: #e7f3ff;
+            border: 1px solid #667eea;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #667eea;
+        }
+
+        /* 快捷鍵提示 */
+        .shortcut-hint {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .shortcut-hint kbd {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏨 澳門酒店房費統計系統 v2.0</h1>
+            <p>自動計算功能 | 賭場送房條件查詢 | 房費統計管理</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('stats')">📋 房費統計表</button>
+            <button class="nav-tab" onclick="switchTab('query')">🔍 送房條件查詢</button>
+            <button class="nav-tab" onclick="switchTab('calc')">🧮 自動計算機</button>
+        </div>
+
+        <!-- 房費統計表 Tab -->
+        <div id="statsTab" class="tab-content active">
+            <div class="controls">
+                <button class="btn btn-primary" onclick="showAddModal()">
+                    <span>➕</span> 新增記錄
+                </button>
+                <button class="btn btn-success" onclick="exportToExcel()">
+                    <span>📊</span> 匯出 Excel
+                </button>
+                <button class="btn btn-danger" onclick="clearAllData()">
+                    <span>🗑️</span> 清空全部
+                </button>
+                <div class="month-selector">
+                    <label>選擇月份：</label>
+                    <select id="monthSelect" onchange="loadMonthData()">
+                        <option value="2026-05">2026年5月</option>
+                        <option value="2026-06">2026年6月</option>
+                        <option value="2026-07">2026年7月</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="statsTable">
+                    <thead>
+                        <tr>
+                            <th>線頭</th>
+                            <th>入住日期</th>
+                            <th>退房日期</th>
+                            <th>酒店/房號</th>
+                            <th>明細</th>
+                            <th>金額 (HKD)</th>
+                            <th>應洗碼量</th>
+                            <th>實際洗碼量</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                    <tfoot id="tableFooter"></tfoot>
+                </table>
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <div class="empty-state-icon">📭</div>
+                    <p>尚無記錄，點擊「新增記錄」開始</p>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="label">訂房費總額</div>
+                        <div class="value" id="totalRoomFee">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">應洗碼量</div>
+                        <div class="value" id="totalGuestCode">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">實際洗碼量</div>
+                        <div class="value" id="totalCode">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">達標率</div>
+                        <div class="value" id="achievementRate">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 送房條件查詢 Tab -->
+        <div id="queryTab" class="tab-content">
+            <div class="query-section">
+                <h3>🔍 賭場送房條件查詢</h3>
+                <div class="query-grid">
+                    <div class="form-group">
+                        <label>賭場</label>
+                        <select id="queryCasino" onchange="updateQueryResults()">
+                            <option value="">全部</option>
+                            <option value="sands">金沙系</option>
+                            <option value="melco">新濠系</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>線頭</label>
+                        <select id="queryType" onchange="updateQueryResults()">
+                            <option value="">全部</option>
+                            <option value="anonymous">匿名人</option>
+                            <option value="macau">澳門人</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>會籍</label>
+                        <select id="queryMembership" onchange="updateQueryResults()">
+                            <option value="">全部</option>
+                            <option value="diamond">金鑽</option>
+                            <option value="diamondCard">鑽卡</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>房控代碼</label>
+                        <input type="text" id="queryCode" placeholder="輸入房控代碼查詢" onkeyup="updateQueryResults()">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="updateQueryResults()">🔍 查詢</button>
+                <button class="btn btn-warning" onclick="clearQuery()">清除</button>
+            </div>
+
+            <div id="queryResults" class="query-section">
+                <h3>📋 查詢結果</h3>
+                <div id="queryTableContainer"></div>
+            </div>
+        </div>
+
+        <!-- 自動計算機 Tab -->
+        <div id="calcTab" class="tab-content">
+            <div class="calculator-section">
+                <h3>🧮 澳門酒店送房自動計算機</h3>
+                <div class="auto-calc-hint">
+                    💡 提示：選擇入住日期和房控代碼後，系統會自動計算平日/週五/週六價格與總金額
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>入住日期 *</label>
+                        <input type="date" id="calcCheckIn" onchange="autoCalc()">
+                    </div>
+                    <div class="form-group">
+                        <label>退房日期 *</label>
+                        <input type="date" id="calcCheckOut" onchange="autoCalc()">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>賭場</label>
+                        <select id="calcCasino" onchange="updateCodeOptions()">
+                            <option value="sands">金沙系</option>
+                            <option value="melco">新濠系</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>線頭類型</label>
+                        <select id="calcType" onchange="autoCalc()">
+                            <option value="anonymous">匿名人</option>
+                            <option value="macau">澳門人（新濠）</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>會籍</label>
+                        <select id="calcMembership" onchange="autoCalc()">
+                            <option value="diamond">金鑽</option>
+                            <option value="diamondCard">鑽卡</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>房控代碼 *</label>
+                        <select id="calcCode" onchange="autoCalc()">
+                            <!-- 動態填充 -->
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>房間數量</label>
+                    <input type="number" id="calcRooms" value="1" min="1" max="10" onchange="autoCalc()">
+                </div>
+
+                <div id="calcResult" class="calc-result" style="display: none;">
+                    <h4>📊 計算結果</h4>
+                    <div class="calc-result-item">
+                        <span class="label">入住日期：</span>
+                        <span class="value" id="resCheckIn">-</span>
+                    </div>
+                    <div class="calc-result-item">
+                        <span class="label">退房日期：</span>
+                        <span class="value" id="resCheckOut">-</span>
+                    </div>
+                    <div class="calc-result-item">
+                        <span class="label">房控代碼：</span>
+                        <span class="value" id="resCode">-</span>
+                    </div>
+                    <div class="calc-result-item">
+                        <span class="label">房型：</span>
+                        <span class="value" id="resRoomType">-</span>
+                    </div>
+                    <hr style="opacity: 0.3; margin: 15px 0;">
+                    <div class="calc-result-item">
+                        <span class="label">平日晚數：</span>
+                        <span class="value" id="resWeekday">-</span>
+                    </div>
+                    <div class="calc-result-item">
+                        <span class="label">週五晚數：</span>
+                        <span class="value" id="resFriday">-</span>
+                    </div>
+                    <div class="calc-result-item">
+                        <span class="label">週六晚數：</span>
+                        <span class="value" id="resSaturday">-</span>
+                    </div>
+                    <hr style="opacity: 0.3; margin: 15px 0;">
+                    <div class="calc-result-item">
+                        <span class="label">平日單價：</span>
+                        <span class="value" id="resWeekdayPrice">-</span>
+                    </div>
+                    <div class="calc-result-item">
+                        <span class="label">週五單價：</span>
+                        <span class="value" id="resFridayPrice">-</span>
+                    </div>
+                    <div class="calc-result-item">
+                        <span class="label">週六單價：</span>
+                        <span class="value" id="resSaturdayPrice">-</span>
+                    </div>
+                    <hr style="opacity: 0.3; margin: 15px 0;">
+                    <div class="calc-result-item">
+                        <span class="label">明細：</span>
+                        <span class="value" id="resDetails">-</span>
+                    </div>
+                    <hr style="opacity: 0.3; margin: 15px 0;">
+                    <div class="calc-result-item" style="font-size: 20px;">
+                        <span class="label">總金額：</span>
+                        <span class="value" id="resTotal">0</span>
+                    </div>
+                    <div class="calc-result-item">
+                        <span class="label">需洗碼量：</span>
+                        <span class="value" id="resRequiredCode">0</span>
+                    </div>
+                </div>
+
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button class="btn btn-success" onclick="addToStats()">➕ 加入統計表</button>
+                    <button class="btn btn-primary" onclick="copyResult()">📋 複製結果</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增/編輯模態框 -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">新增記錄</div>
+            <form id="addForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>線頭 *</label>
+                        <input type="text" id="addAccount" required>
+                    </div>
+                    <div class="form-group">
+                        <label>金額 (HKD) *</label>
+                        <input type="number" id="addAmount" min="0" step="1" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>入住日期 *</label>
+                        <input type="date" id="addCheckIn" required>
+                    </div>
+                    <div class="form-group">
+                        <label>退房日期 *</label>
+                        <input type="date" id="addCheckOut" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>酒店/房號 *</label>
+                    <input type="text" id="addHotel" placeholder="例：威尼斯人-大套" required>
+                </div>
+                <div class="form-group">
+                    <label>明細</label>
+                    <textarea id="addDetails" placeholder="例：平日×3晚×1800 + 週五×2晚×2200"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>應洗碼量</label>
+                        <input type="number" id="addRequiredCode" min="0" step="1" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>實際洗碼量</label>
+                        <input type="number" id="addActualCode" min="0" step="1" value="0">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-warning" onclick="hideAddModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 編輯模態框 -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">編輯記錄</div>
+            <form id="editForm">
+                <input type="hidden" id="editIndex">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>線頭 *</label>
+                        <input type="text" id="editAccount" required>
+                    </div>
+                    <div class="form-group">
+                        <label>金額 (HKD) *</label>
+                        <input type="number" id="editAmount" min="0" step="1" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>入住日期 *</label>
+                        <input type="date" id="editCheckIn" required>
+                    </div>
+                    <div class="form-group">
+                        <label>退房日期 *</label>
+                        <input type="date" id="editCheckOut" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>酒店/房號 *</label>
+                    <input type="text" id="editHotel" required>
+                </div>
+                <div class="form-group">
+                    <label>明細</label>
+                    <textarea id="editDetails"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>應洗碼量</label>
+                        <input type="number" id="editRequiredCode" min="0" step="1" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>實際洗碼量</label>
+                        <input type="number" id="editActualCode" min="0" step="1" value="0">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-warning" onclick="hideEditModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">更新</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 刪除確認模態框 -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">確認刪除</div>
+            <div class="delete-confirm">
+                <p>確定要刪除這條記錄嗎？</p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-warning" onclick="hideDeleteModal()">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">刪除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+        // ========== 房控代碼與價格資料庫 ==========
+        const roomPricingDatabase = {
+            // 金沙系 - 四季名店 / 康萊德 / 倫敦人 / 威尼斯人
+            sands: {
+                anonymous: {
+                    diamond: {
+                        // 雅致/豪華系列
+                        'PH2B': { roomType: '雅致房', weekday: 1200, friday: 1500, saturday: 1800, premium: 2200 },
+                        'PH3B': { roomType: '豪華房', weekday: 1400, friday: 1700, saturday: 2000, premium: 2500 },
+                        'RO3B': { roomType: '一房一廳', weekday: 1600, friday: 1900, saturday: 2200, premium: 2800 },
+                        'K1RV': { roomType: '貝麗套房', weekday: 2000, friday: 2400, saturday: 2800, premium: 3500 },
+                        'SMAK1': { roomType: 'Chic Suite', weekday: 2200, friday: 2600, saturday: 3000, premium: 3800 },
+                        'SMA11': { roomType: 'Grand Suite', weekday: 2400, friday: 2800, saturday: 3200, premium: 4000 },
+                        'SVPM2': { roomType: 'Grand Deluxe', weekday: 2600, friday: 3000, saturday: 3400, premium: 4200 },
+                        // King/Club 系列
+                        'I02': { roomType: 'King Room', weekday: 1800, friday: 2100, saturday: 2400, premium: 3000 },
+                        'V02': { roomType: 'Deluxe Twin/King', weekday: 2000, friday: 2300, saturday: 2600, premium: 3200 },
+                        'JK': { roomType: 'Club Deluxe', weekday: 2200, friday: 2500, saturday: 2800, premium: 3400 },
+                        // Elegance/Diplomat 系列
+                        'GRSK': { roomType: 'Diplomat Suite', weekday: 2800, friday: 3200, saturday: 3600, premium: 4500 },
+                        'GRST': { roomType: 'Crystal Suite', weekday: 3000, friday: 3400, saturday: 3800, premium: 4800 },
+                        'GDGK': { roomType: 'Premier King', weekday: 3200, friday: 3600, saturday: 4000, premium: 5000 },
+                        // 高級套房
+                        'E/EEB': { roomType: 'Executive Suite', weekday: 3500, friday: 4000, saturday: 4500, premium: 5500 },
+                        'P/PB': { roomType: 'Presidential Suite', weekday: 5000, friday: 5500, saturday: 6000, premium: 7500 }
+                    }
+                }
+            },
+            // 新濠系 - 摩珀斯 / 新濠天地 / 新濠影滙
+            melco: {
+                anonymous: {
+                    diamond: {
+                        'MPK': { roomType: 'Crystal Suite', weekday: 1800, friday: 2200, saturday: 2600, premium: 3200 },
+                        'MCKN': { roomType: 'Premier King', weekday: 2000, friday: 2400, saturday: 2800, premium: 3400 },
+                        'MPT': { roomType: 'Premier Suite', weekday: 2400, friday: 2800, saturday: 3200, premium: 4000 },
+                        'MCPT': { roomType: 'Pool Suite', weekday: 2800, friday: 3200, saturday: 3600, premium: 4500 },
+                        'MPS': { roomType: 'StayPool Villa', weekday: 3500, friday: 4000, saturday: 4500, premium: 5500 },
+                        'MS1': { roomType: 'Delux', weekday: 1600, friday: 1900, saturday: 2200, premium: 2700 },
+                        'MSZ': { roomType: 'Queen Room', weekday: 1400, friday: 1700, saturday: 2000, premium: 2500 }
+                    },
+                    diamondCard: {
+                        'MPK': { roomType: 'Crystal Suite', weekday: 1600, friday: 1900, saturday: 2200, premium: 2800 },
+                        'MCKN': { roomType: 'Premier King', weekday: 1800, friday: 2100, saturday: 2400, premium: 3000 },
+                        'MPT': { roomType: 'Premier Suite', weekday: 2000, friday: 2400, saturday: 2800, premium: 3500 }
+                    }
+                },
+                macau: {
+                    diamond: {
+                        'NPK': { roomType: 'Nova', weekday: 1400, friday: 1700, saturday: 2000, premium: 2500 },
+                        'NPVK': { roomType: 'Crystal Suite', weekday: 1600, friday: 1900, saturday: 2200, premium: 2800 },
+                        'NCPK': { roomType: 'Presidential Villa', weekday: 3000, friday: 3400, saturday: 3800, premium: 4800 },
+                        'NPQ': { roomType: 'Grand King', weekday: 1800, friday: 2100, saturday: 2400, premium: 3000 }
+                    }
+                }
+            }
+        };
+
+        // ========== 資料儲存 ==========
+        let currentMonth = '2026-05';
+        let records = [];
+        let deleteIndex = -1;
+        let calcResultData = null;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMonthData();
+            updateCodeOptions();
+        });
+
+        // Tab 切換
+        function switchTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelector(`.nav-tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+        }
+
+        // 月份選擇變更
+        function loadMonthData() {
+            currentMonth = document.getElementById('monthSelect').value;
+            loadData();
+            renderTable();
+            updateStats();
+        }
+
+        // 載入資料
+        function loadData() {
+            const data = localStorage.getItem(`macauRoomStats_${currentMonth}`);
+            records = data ? JSON.parse(data) : [];
+        }
+
+        // 儲存資料
+        function saveData() {
+            localStorage.setItem(`macauRoomStats_${currentMonth}`, JSON.stringify(records));
+        }
+
+        // 渲染表格
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (records.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+                tbody.innerHTML = records.map((record, index) => `
+                    <tr>
+                        <td>${record.account}</td>
+                        <td>${record.checkIn}</td>
+                        <td>${record.checkOut}</td>
+                        <td>${record.hotel}</td>
+                        <td>${record.details || '-'}</td>
+                        <td style="text-align: right;">${formatNumber(record.amount)}</td>
+                        <td style="text-align: right;">${formatNumber(record.requiredCode)}</td>
+                        <td style="text-align: right;">${formatNumber(record.actualCode)}</td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn btn-primary btn-sm" onclick="showEditModal(${index})">✏️</button>
+                                <button class="btn btn-danger btn-sm" onclick="showDeleteModal(${index})">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            updateFooter();
+        }
+
+        // 更新表格底部統計
+        function updateFooter() {
+            const tfoot = document.getElementById('tableFooter');
+            const totalAmount = records.reduce((sum, r) => sum + (r.amount || 0), 0);
+            const totalRequired = records.reduce((sum, r) => sum + (r.requiredCode || 0), 0);
+            const totalActual = records.reduce((sum, r) => sum + (r.actualCode || 0), 0);
+            
+            tfoot.innerHTML = `
+                <tr class="total-row">
+                    <td>總計</td>
+                    <td colspan="4"></td>
+                    <td style="text-align: right;">${formatNumber(totalAmount)}</td>
+                    <td style="text-align: right;">${formatNumber(totalRequired)}</td>
+                    <td style="text-align: right;">${formatNumber(totalActual)}</td>
+                    <td></td>
+                </tr>
+            `;
+        }
+
+        // 更新統計卡片
+        function updateStats() {
+            const totalAmount = records.reduce((sum, r) => sum + (r.amount || 0), 0);
+            const totalRequired = records.reduce((sum, r) => sum + (r.requiredCode || 0), 0);
+            const totalActual = records.reduce((sum, r) => sum + (r.actualCode || 0), 0);
+            const rate = totalRequired > 0 ? (totalActual / totalRequired * 100).toFixed(1) : 0;
+            
+            document.getElementById('totalRoomFee').textContent = formatNumber(totalAmount);
+            document.getElementById('totalGuestCode').textContent = formatNumber(totalRequired);
+            document.getElementById('totalCode').textContent = formatNumber(totalActual);
+            document.getElementById('achievementRate').textContent = rate + '%';
+        }
+
+        // 格式化數字
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // ========== 自動計算功能 ==========
+        function updateCodeOptions() {
+            const casino = document.getElementById('calcCasino').value;
+            const type = document.getElementById('calcType').value;
+            const membership = document.getElementById('calcMembership').value;
+            const select = document.getElementById('calcCode');
+            
+            select.innerHTML = '<option value="">請選擇房控代碼</option>';
+            
+            const codes = roomPricingDatabase[casino]?.[type]?.[membership];
+            if (codes) {
+                Object.keys(codes).sort().forEach(code => {
+                    const option = document.createElement('option');
+                    option.value = code;
+                    option.textContent = `${code} - ${codes[code].roomType}`;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        function autoCalc() {
+            const checkIn = document.getElementById('calcCheckIn').value;
+            const checkOut = document.getElementById('calcCheckOut').value;
+            const code = document.getElementById('calcCode').value;
+            const rooms = parseInt(document.getElementById('calcRooms').value) || 1;
+            
+            if (!checkIn || !checkOut || !code) {
+                document.getElementById('calcResult').style.display = 'none';
+                return;
+            }
+
+            const casino = document.getElementById('calcCasino').value;
+            const type = document.getElementById('calcType').value;
+            const membership = document.getElementById('calcMembership').value;
+            
+            const pricing = roomPricingDatabase[casino]?.[type]?.[membership]?.[code];
+            if (!pricing) {
+                alert('找不到該房控代碼的價格資料');
+                return;
+            }
+
+            // 計算各類晚數
+            const days = calculateDays(checkIn, checkOut);
+            const { weekdays, fridays, saturdays } = calculateDayTypes(checkIn, days);
+            
+            // 計算總金額
+            const total = (weekdays * pricing.weekday + fridays * pricing.friday + saturdays * pricing.saturday) * rooms;
+            
+            // 計算需洗碼量（金額 × 2）
+            const requiredCode = Math.ceil(total * 2);
+
+            // 組裝明細
+            let details = [];
+            if (weekdays > 0) details.push(`平日×${weekdays}晚×${formatNumber(pricing.weekday)}`);
+            if (fridays > 0) details.push(`週五×${fridays}晚×${formatNumber(pricing.friday)}`);
+            if (saturdays > 0) details.push(`週六×${saturdays}晚×${formatNumber(pricing.saturday)}`);
+            if (rooms > 1) details.push(`×${rooms}間`);
+
+            // 顯示結果
+            document.getElementById('calcResult').style.display = 'block';
+            document.getElementById('resCheckIn').textContent = checkIn;
+            document.getElementById('resCheckOut').textContent = checkOut;
+            document.getElementById('resCode').textContent = code;
+            document.getElementById('resRoomType').textContent = pricing.roomType;
+            document.getElementById('resWeekday').textContent = weekdays;
+            document.getElementById('resFriday').textContent = fridays;
+            document.getElementById('resSaturday').textContent = saturdays;
+            document.getElementById('resWeekdayPrice').textContent = formatNumber(pricing.weekday);
+            document.getElementById('resFridayPrice').textContent = formatNumber(pricing.friday);
+            document.getElementById('resSaturdayPrice').textContent = formatNumber(pricing.saturday);
+            document.getElementById('resDetails').textContent = details.join(' + ');
+            document.getElementById('resTotal').textContent = formatNumber(total);
+            document.getElementById('resRequiredCode').textContent = formatNumber(requiredCode);
+
+            // 保存計算結果
+            calcResultData = {
+                checkIn,
+                checkOut,
+                code,
+                roomType: pricing.roomType,
+                details: details.join(' + '),
+                amount: total,
+                requiredCode
+            };
+        }
+
+        function calculateDays(start, end) {
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            return Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+        }
+
+        function calculateDayTypes(startDate, days) {
+            let weekdays = 0, fridays = 0, saturdays = 0;
+            const start = new Date(startDate);
+            
+            for (let i = 0; i < days; i++) {
+                const date = new Date(start);
+                date.setDate(date.getDate() + i);
+                const dayOfWeek = date.getDay();
+                
+                if (dayOfWeek === 5) fridays++;
+                else if (dayOfWeek === 6) saturdays++;
+                else if (dayOfWeek !== 0) weekdays++; // 排除週日
+            }
+            
+            return { weekdays, fridays, saturdays };
+        }
+
+        function addToStats() {
+            if (!calcResultData) {
+                alert('請先進行計算');
+                return;
+            }
+            
+            document.getElementById('addAccount').value = '';
+            document.getElementById('addCheckIn').value = calcResultData.checkIn;
+            document.getElementById('addCheckOut').value = calcResultData.checkOut;
+            document.getElementById('addHotel').value = calcResultData.code + ' ' + calcResultData.roomType;
+            document.getElementById('addDetails').value = calcResultData.details;
+            document.getElementById('addAmount').value = calcResultData.amount;
+            document.getElementById('addRequiredCode').value = calcResultData.requiredCode;
+            document.getElementById('addActualCode').value = 0;
+            
+            switchTab('stats');
+            showAddModal();
+        }
+
+        function copyResult() {
+            if (!calcResultData) {
+                alert('請先進行計算');
+                return;
+            }
+            
+            const text = `入住：${calcResultData.checkIn}
+退房：${calcResultData.checkOut}
+房型：${calcResultData.code} ${calcResultData.roomType}
+明細：${calcResultData.details}
+金額：HK$ ${formatNumber(calcResultData.amount)}
+需洗碼：${formatNumber(calcResultData.requiredCode)}`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('已複製到剪貼簿！');
+            });
+        }
+
+        // ========== 查詢功能 ==========
+        function updateQueryResults() {
+            const casino = document.getElementById('queryCasino').value;
+            const type = document.getElementById('queryType').value;
+            const membership = document.getElementById('queryMembership').value;
+            const code = document.getElementById('queryCode').value.toUpperCase();
+            
+            const container = document.getElementById('queryTableContainer');
+            
+            let html = '<table class="price-table"><thead><tr><th>賭場</th><th>線頭</th><th>會籍</th><th>房控代碼</th><th>房型</th><th>平日</th><th>週五</th><th>週六</th></tr></thead><tbody>';
+            
+            let hasResults = false;
+            
+            for (const [casinoKey, casinos] of Object.entries(roomPricingDatabase)) {
+                if (casino && casinoKey !== casino) continue;
+                
+                for (const [typeKey, types] of Object.entries(casinos)) {
+                    if (type && typeKey !== type) continue;
+                    
+                    for (const [memberKey, codes] of Object.entries(types)) {
+                        if (membership && memberKey !== membership) continue;
+                        
+                        for (const [codeKey, pricing] of Object.entries(codes)) {
+                            if (code && !codeKey.includes(code)) continue;
+                            
+                            hasResults = true;
+                            const casinoName = casinoKey === 'sands' ? '金沙系' : '新濠系';
+                            const typeName = typeKey === 'anonymous' ? '匿名人' : '澳門人';
+                            const memberName = memberKey === 'diamond' ? '金鑽' : '鑽卡';
+                            
+                            html += `<tr>
+                                <td>${casinoName}</td>
+                                <td>${typeName}</td>
+                                <td>${memberName}</td>
+                                <td><strong>${codeKey}</strong></td>
+                                <td>${pricing.roomType}</td>
+                                <td>${formatNumber(pricing.weekday)}</td>
+                                <td>${formatNumber(pricing.friday)}</td>
+                                <td>${formatNumber(pricing.saturday)}</td>
+                            </tr>`;
+                        }
+                    }
+                }
+            }
+            
+            if (!hasResults) {
+                html += '<tr><td colspan="8" style="text-align: center; color: #999;">找不到符合條件的資料</td></tr>';
+            }
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function clearQuery() {
+            document.getElementById('queryCasino').value = '';
+            document.getElementById('queryType').value = '';
+            document.getElementById('queryMembership').value = '';
+            document.getElementById('queryCode').value = '';
+            updateQueryResults();
+        }
+
+        // ========== CRUD 操作 ==========
+        function showAddModal() {
+            document.getElementById('addForm').reset();
+            document.getElementById('addModal').classList.add('active');
+        }
+
+        function hideAddModal() {
+            document.getElementById('addModal').classList.remove('active');
+        }
+
+        function showEditModal(index) {
+            const record = records[index];
+            document.getElementById('editIndex').value = index;
+            document.getElementById('editAccount').value = record.account;
+            document.getElementById('editCheckIn').value = record.checkIn;
+            document.getElementById('editCheckOut').value = record.checkOut;
+            document.getElementById('editHotel').value = record.hotel;
+            document.getElementById('editDetails').value = record.details || '';
+            document.getElementById('editAmount').value = record.amount;
+            document.getElementById('editRequiredCode').value = record.requiredCode || 0;
+            document.getElementById('editActualCode').value = record.actualCode || 0;
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function hideEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        function showDeleteModal(index) {
+            deleteIndex = index;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function hideDeleteModal() {
+            deleteIndex = -1;
+            document.getElementById('deleteModal').classList.remove('active');
+        }
+
+        function confirmDelete() {
+            if (deleteIndex >= 0) {
+                records.splice(deleteIndex, 1);
+                saveData();
+                renderTable();
+                updateStats();
+                hideDeleteModal();
+            }
+        }
+
+        // 表單提交
+        document.getElementById('addForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const record = {
+                account: document.getElementById('addAccount').value,
+                checkIn: document.getElementById('addCheckIn').value,
+                checkOut: document.getElementById('addCheckOut').value,
+                hotel: document.getElementById('addHotel').value,
+                details: document.getElementById('addDetails').value,
+                amount: parseInt(document.getElementById('addAmount').value) || 0,
+                requiredCode: parseInt(document.getElementById('addRequiredCode').value) || 0,
+                actualCode: parseInt(document.getElementById('addActualCode').value) || 0
+            };
+            
+            records.push(record);
+            saveData();
+            renderTable();
+            updateStats();
+            hideAddModal();
+        });
+
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const index = parseInt(document.getElementById('editIndex').value);
+            records[index] = {
+                account: document.getElementById('editAccount').value,
+                checkIn: document.getElementById('editCheckIn').value,
+                checkOut: document.getElementById('editCheckOut').value,
+                hotel: document.getElementById('editHotel').value,
+                details: document.getElementById('editDetails').value,
+                amount: parseInt(document.getElementById('editAmount').value) || 0,
+                requiredCode: parseInt(document.getElementById('editRequiredCode').value) || 0,
+                actualCode: parseInt(document.getElementById('editActualCode').value) || 0
+            };
+            
+            saveData();
+            renderTable();
+            updateStats();
+            hideEditModal();
+        });
+
+        // 匯出 Excel
+        function exportToExcel() {
+            if (records.length === 0) {
+                alert('沒有資料可以匯出');
+                return;
+            }
+            
+            const exportData = records.map(r => ({
+                '線頭': r.account,
+                '入住日期': r.checkIn,
+                '退房日期': r.checkOut,
+                '酒店/房號': r.hotel,
+                '明細': r.details || '',
+                '金額 (HKD)': r.amount,
+                '應洗碼量': r.requiredCode || 0,
+                '實際洗碼量': r.actualCode || 0
+            }));
+            
+            const totalAmount = records.reduce((sum, r) => sum + (r.amount || 0), 0);
+            const totalRequired = records.reduce((sum, r) => sum + (r.requiredCode || 0), 0);
+            const totalActual = records.reduce((sum, r) => sum + (r.actualCode || 0), 0);
+            
+            exportData.push({
+                '線頭': '總計',
+                '入住日期': '',
+                '退房日期': '',
+                '酒店/房號': '',
+                '明細': '',
+                '金額 (HKD)': totalAmount,
+                '應洗碼量': totalRequired,
+                '實際洗碼量': totalActual
+            });
+            
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '房費統計');
+            
+            const fileName = `澳門房費統計_${currentMonth}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        // 清空全部
+        function clearAllData() {
+            if (confirm('確定要清空所有記錄嗎？此操作不可恢復！')) {
+                records = [];
+                saveData();
+                renderTable();
+                updateStats();
+            }
+        }
+    </script>
+</body>
+</html>
