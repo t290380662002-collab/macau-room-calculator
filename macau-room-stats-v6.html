@@ -517,7 +517,7 @@
         <!-- 月份導航 -->
         <div class="month-nav">
             <button onclick="changeMonth(-1)">◀</button>
-            <button class="month-label month-picker" id="monthLabel" onclick="openMonthPicker()">2025年6月</button>
+            <button class="month-label month-picker" id="monthLabel" onclick="event.stopPropagation();openMonthPicker()">2025年6月</button>
             <div id="monthPicker" class="month-picker-dropdown" style="display:none">
                 <div class="mp-quick-btns">
                     <button class="mp-quick" onclick="mpQuick('thisWeek')">📆 本週</button> 
