@@ -740,12 +740,15 @@
 
         <!-- 頁面:送房條件 -->
         <div id="page-conditions" class="page">
+            <div style="text-align:right;margin-bottom:10px;">
+                <button onclick="openCondAddModal()" style="padding:6px 14px;background:rgba(46,204,113,0.2);border:1px solid rgba(46,204,113,0.3);color:#2ecc71;border-radius:6px;cursor:pointer;font-size:0.85em;">➕ 新增房型</button>
+            </div>
             <div class="card">
                 <div class="card-title">🎁 新濠系送房條件</div>
                 <div class="table-wrap">
                     <table>
                         <thead>
-                            <tr><th>酒店</th><th>Code</th><th>房型</th><th>平日</th><th>週五/六</th><th>特殊日</th><th>洗碼量</th></tr>
+                            <tr><th>酒店</th><th>Code</th><th>房型</th><th>平日</th><th>週五/六</th><th>特殊日</th><th>洗碼量</th><th>操作</th></tr>
                         </thead>
                         <tbody id="condMelco"></tbody>
                     </table>
@@ -756,7 +759,7 @@
                 <div class="table-wrap">
                     <table>
                         <thead>
-                            <tr><th>酒店</th><th>Code</th><th>房型</th><th>平日</th><th>週五/六</th><th>特殊日</th><th>洗碼量</th></tr>
+                            <tr><th>酒店</th><th>Code</th><th>房型</th><th>平日</th><th>週五/六</th><th>特殊日</th><th>洗碼量</th><th>操作</th></tr>
                         </thead>
                         <tbody id="condSands"></tbody>
                     </table>
@@ -767,7 +770,7 @@
                 <div class="table-wrap">
                     <table>
                         <thead>
-                            <tr><th>酒店</th><th>Code</th><th>房型</th><th>平日</th><th>週五/六</th><th>特殊日</th><th>洗碼量</th></tr>
+                            <tr><th>酒店</th><th>Code</th><th>房型</th><th>平日</th><th>週五/六</th><th>特殊日</th><th>洗碼量</th><th>操作</th></tr>
                         </thead>
                         <tbody id="condGalaxy"></tbody>
                     </table>
@@ -786,6 +789,96 @@
             </div>
             <div id="lineHeadList"></div>
             <button onclick="closeLineHeadModal()" style="margin-top:12px;width:100%;padding:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#aaa;border-radius:6px;cursor:pointer;">關閉</button>
+        </div>
+    </div>
+
+    <!-- 送房條件-編輯 Modal -->
+    <div class="modal-overlay" id="condEditModal">
+        <div class="modal-box">
+            <h3>✏️ 修改房型價格</h3>
+            <input type="hidden" id="ceHotel">
+            <input type="hidden" id="ceIdx">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Code</label>
+                    <input type="text" id="ceCode">
+                </div>
+                <div class="form-group">
+                    <label>房型名稱</label>
+                    <input type="text" id="ceName">
+                </div>
+                <div class="form-group">
+                    <label>平日價</label>
+                    <input type="number" id="ceWeekday">
+                </div>
+                <div class="form-group">
+                    <label>週五/六價</label>
+                    <input type="number" id="ceWeekend">
+                </div>
+                <div class="form-group">
+                    <label>特殊日價</label>
+                    <input type="number" id="cePremium">
+                </div>
+                <div class="form-group">
+                    <label>洗碼量(萬)</label>
+                    <input type="number" id="ceWash">
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+                <button onclick="saveCondEdit()" style="flex:1;padding:9px;background:rgba(46,204,113,0.2);border:1px solid rgba(46,204,113,0.3);color:#2ecc71;border-radius:6px;cursor:pointer;">儲存</button>
+                <button onclick="closeCondEditModal()" style="flex:1;padding:9px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#aaa;border-radius:6px;cursor:pointer;">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 送房條件-新增 Modal -->
+    <div class="modal-overlay" id="condAddModal">
+        <div class="modal-box">
+            <h3>➕ 新增房型</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>酒店</label>
+                    <select id="caHotel">
+                        <option value="">選擇酒店</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>集團</label>
+                    <select id="caGroup">
+                        <option value="melco">新濠系</option>
+                        <option value="sands">金沙系</option>
+                        <option value="galaxy">銀河系</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Code</label>
+                    <input type="text" id="caCode" placeholder="如: MPK">
+                </div>
+                <div class="form-group">
+                    <label>房型名稱</label>
+                    <input type="text" id="caName" placeholder="如: 摩珀斯套房(大床)">
+                </div>
+                <div class="form-group">
+                    <label>平日價</label>
+                    <input type="number" id="caWeekday" placeholder="1500">
+                </div>
+                <div class="form-group">
+                    <label>週五/六價</label>
+                    <input type="number" id="caWeekend" placeholder="1800">
+                </div>
+                <div class="form-group">
+                    <label>特殊日價</label>
+                    <input type="number" id="caPremium" placeholder="2700">
+                </div>
+                <div class="form-group">
+                    <label>洗碼量(萬)</label>
+                    <input type="number" id="caWash" placeholder="80">
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+                <button onclick="saveCondAdd()" style="flex:1;padding:9px;background:rgba(46,204,113,0.2);border:1px solid rgba(46,204,113,0.3);color:#2ecc71;border-radius:6px;cursor:pointer;">新增</button>
+                <button onclick="closeCondAddModal()" style="flex:1;padding:9px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#aaa;border-radius:6px;cursor:pointer;">取消</button>
+            </div>
         </div>
     </div>
 
@@ -1237,6 +1330,17 @@
             }
             renderAll();
             setTimeout(() => { isRemoteUpdate = false; }, 100);
+        });
+        // 監聽 hotelData 同步
+        db.ref('hotelData').off('value');
+        db.ref('hotelData').on('value', snap => {
+            const val = snap.val();
+            if (val && typeof val === 'object') {
+                localStorage.setItem('macau_hotel_data', JSON.stringify(val));
+                Object.keys(val).forEach(h => { hotelData[h] = val[h]; });
+                renderConditions();
+                updateHotelDropdown();
+            }
         });
     }
 
@@ -1702,7 +1806,7 @@
         let galaxyHtml = '';
 
         Object.entries(hotelData).forEach(([hotel, data]) => {
-            data.rooms.forEach(r => {
+            data.rooms.forEach((r, idx) => {
                 const row = `<tr>
                     <td class="col-hotel">${hotel}</td>
                     <td>${r.code}</td>
@@ -1711,6 +1815,10 @@
                     <td>${r.weekend}</td>
                     <td>${r.premium || '-'}</td>
                     <td class="col-need">${r.wash}萬</td>
+                    <td style="white-space:nowrap;">
+                        <button onclick="openCondEditModal('${hotel}',${idx})" style="padding:3px 8px;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);color:#ffd700;border-radius:4px;cursor:pointer;font-size:0.75em;">✏️</button>
+                        <button onclick="deleteCondRoom('${hotel}',${idx})" style="padding:3px 8px;background:rgba(255,77,77,0.15);border:1px solid rgba(255,77,77,0.3);color:#ff4d4d;border-radius:4px;cursor:pointer;font-size:0.75em;">🗑️</button>
+                    </td>
                 </tr>`;
                 if (data.group === 'melco') melcoHtml += row;
                 else if (data.group === 'sands') sandsHtml += row;
@@ -1721,6 +1829,134 @@
         document.getElementById('condMelco').innerHTML = melcoHtml;
         document.getElementById('condSands').innerHTML = sandsHtml;
         document.getElementById('condGalaxy').innerHTML = galaxyHtml;
+    }
+
+    // 送房條件-編輯
+    function openCondEditModal(hotel, idx) {
+        const r = hotelData[hotel].rooms[idx];
+        document.getElementById('ceHotel').value = hotel;
+        document.getElementById('ceIdx').value = idx;
+        document.getElementById('ceCode').value = r.code;
+        document.getElementById('ceName').value = r.name;
+        document.getElementById('ceWeekday').value = r.weekday;
+        document.getElementById('ceWeekend').value = r.weekend;
+        document.getElementById('cePremium').value = r.premium || '';
+        document.getElementById('ceWash').value = r.wash;
+        document.getElementById('condEditModal').classList.add('show');
+    }
+    function closeCondEditModal() {
+        document.getElementById('condEditModal').classList.remove('show');
+    }
+    function saveCondEdit() {
+        const hotel = document.getElementById('ceHotel').value;
+        const idx = parseInt(document.getElementById('ceIdx').value);
+        hotelData[hotel].rooms[idx].code = document.getElementById('ceCode').value.trim();
+        hotelData[hotel].rooms[idx].name = document.getElementById('ceName').value.trim();
+        hotelData[hotel].rooms[idx].weekday = parseInt(document.getElementById('ceWeekday').value) || 0;
+        hotelData[hotel].rooms[idx].weekend = parseInt(document.getElementById('ceWeekend').value) || 0;
+        hotelData[hotel].rooms[idx].premium = parseInt(document.getElementById('cePremium').value) || 0;
+        hotelData[hotel].rooms[idx].wash = parseInt(document.getElementById('ceWash').value) || 0;
+        saveHotelData();
+        closeCondEditModal();
+        renderConditions();
+        updateHotelDropdown();
+        alert('✅ 已修改!');
+    }
+
+    // 送房條件-刪除
+    function deleteCondRoom(hotel, idx) {
+        const r = hotelData[hotel].rooms[idx];
+        if (!confirm(`確定刪除 ${hotel} - ${r.name}?`)) return;
+        hotelData[hotel].rooms.splice(idx, 1);
+        if (hotelData[hotel].rooms.length === 0) delete hotelData[hotel];
+        saveHotelData();
+        renderConditions();
+        updateHotelDropdown();
+        alert('✅ 已刪除!');
+    }
+
+    // 送房條件-新增
+    function openCondAddModal() {
+        const sel = document.getElementById('caHotel');
+        sel.innerHTML = '<option value="">選擇酒店</option>';
+        Object.keys(hotelData).forEach(h => {
+            sel.innerHTML += `<option value="${h}">${h}</option>`;
+        });
+        sel.innerHTML += '<option value="__new__">➕ 新增酒店</option>';
+        document.getElementById('caCode').value = '';
+        document.getElementById('caName').value = '';
+        document.getElementById('caWeekday').value = '';
+        document.getElementById('caWeekend').value = '';
+        document.getElementById('caPremium').value = '';
+        document.getElementById('caWash').value = '';
+        document.getElementById('condAddModal').classList.add('show');
+    }
+    function closeCondAddModal() {
+        document.getElementById('condAddModal').classList.remove('show');
+    }
+    function saveCondAdd() {
+        let hotel = document.getElementById('caHotel').value;
+        const group = document.getElementById('caGroup').value;
+        const code = document.getElementById('caCode').value.trim();
+        const name = document.getElementById('caName').value.trim();
+        const weekday = parseInt(document.getElementById('caWeekday').value) || 0;
+        const weekend = parseInt(document.getElementById('caWeekend').value) || 0;
+        const premium = parseInt(document.getElementById('caPremium').value) || 0;
+        const wash = parseInt(document.getElementById('caWash').value) || 0;
+
+        if (hotel === '__new__') {
+            hotel = prompt('請輸入新酒店名稱:');
+            if (!hotel || !hotel.trim()) return;
+            hotel = hotel.trim();
+        }
+        if (!hotel || !code || !name) {
+            alert('請填寫酒店、Code、房型名稱');
+            return;
+        }
+        if (!hotelData[hotel]) {
+            hotelData[hotel] = { rooms: [], group: group };
+        }
+        hotelData[hotel].rooms.push({ code, name, weekday, weekend, premium, wash });
+        saveHotelData();
+        closeCondAddModal();
+        renderConditions();
+        updateHotelDropdown();
+        alert('✅ 已新增!');
+    }
+
+    // 持久化 hotelData 到 localStorage
+    function saveHotelData() {
+        localStorage.setItem('macau_hotel_data', JSON.stringify(hotelData));
+        if (firebaseReady && db) {
+            db.ref('hotelData').set(hotelData).catch(e => console.warn('同步失敗:', e.message));
+        }
+    }
+    function loadHotelData() {
+        const saved = localStorage.getItem('macau_hotel_data');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                Object.keys(parsed).forEach(h => {
+                    if (hotelData[h]) {
+                        hotelData[h] = parsed[h];
+                    } else {
+                        hotelData[h] = parsed[h];
+                    }
+                });
+            } catch(e) {}
+        }
+    }
+
+    // 更新新增表單的酒店下拉
+    function updateHotelDropdown() {
+        const sel = document.getElementById('fHotel');
+        if (!sel) return;
+        const val = sel.value;
+        sel.innerHTML = '<option value="">選擇酒店</option>';
+        Object.keys(hotelData).forEach(h => {
+            sel.innerHTML += `<option value="${h}">${h}</option>`;
+        });
+        sel.value = val;
     }
 
     // ========== 匯出Excel ==========
@@ -1772,6 +2008,7 @@
     }
 
     loadLineHeads();
+    loadHotelData();
     listenFirebaseRecords();
     renderAll();
     
