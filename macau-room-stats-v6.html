@@ -517,7 +517,7 @@
         <!-- 月份導航 -->
         <div class="month-nav">
             <button onclick="changeMonth(-1)">◀</button>
-            <button class="month-label month-picker" id="monthLabel" onclick="event.stopPropagation();openMonthPicker()">2025年6月</button>
+            <button class="month-label month-picker" id="monthLabel" onclick="toggleMonthPicker(event)">2025年6月</button>
             <div id="monthPicker" class="month-picker-dropdown" style="display:none">
                 <div class="mp-quick-btns">
                     <button class="mp-quick" onclick="mpQuick('thisWeek')">📆 本週</button> 
@@ -529,7 +529,7 @@
                     <button onclick="mpYear(1)">▶</button>
                 </div>
                 <div class="mp-months">
-                    <span onclick="event.stopPropagation();mpSelect(1)">1月</span><span onclick="event.stopPropagation();mpSelect(2)">2月</span><span onclick="event.stopPropagation();mpSelect(3)">3月</span><span onclick="event.stopPropagation();mpSelect(4)">4月</span><span onclick="event.stopPropagation();mpSelect(5)">5月</span><span onclick="event.stopPropagation();mpSelect(6)">6月</span><span onclick="event.stopPropagation();mpSelect(7)">7月</span><span onclick="event.stopPropagation();mpSelect(8)">8月</span><span onclick="event.stopPropagation();mpSelect(9)">9月</span><span onclick="event.stopPropagation();mpSelect(10)">10月</span><span onclick="event.stopPropagation();mpSelect(11)">11月</span><span onclick="event.stopPropagation();mpSelect(12)">12月</span>
+                    <span onclick="mpSelect(1)">1月</span><span onclick="mpSelect(2)">2月</span><span onclick="mpSelect(3)">3月</span><span onclick="mpSelect(4)">4月</span><span onclick="mpSelect(5)">5月</span><span onclick="mpSelect(6)">6月</span><span onclick="mpSelect(7)">7月</span><span onclick="mpSelect(8)">8月</span><span onclick="mpSelect(9)">9月</span><span onclick="mpSelect(10)">10月</span><span onclick="mpSelect(11)">11月</span><span onclick="mpSelect(12)">12月</span>
                 </div>
                 <div class="mp-date-range">
                     <div class="mp-date-title">自訂日期範圍</div>
@@ -1426,7 +1426,9 @@
     let mpSelectedYear = currentYear;
     let monthPickerOpen = false;
 
-    function openMonthPicker() {
+    function toggleMonthPicker(e) {
+        e.stopPropagation();
+        e.preventDefault();
         const el = document.getElementById('monthPicker');
         if (!el) return;
         if (monthPickerOpen) {
@@ -1476,9 +1478,10 @@
 
     // 點擊外部關閉
     document.addEventListener('click', e => {
+        if (!monthPickerOpen) return;
         const picker = document.getElementById('monthPicker');
         const label = document.getElementById('monthLabel');
-        if (monthPickerOpen && picker && !picker.contains(e.target) && e.target !== label) {
+        if (picker && !picker.contains(e.target) && !label.contains(e.target)) {
             closeMonthPicker();
         }
     });
