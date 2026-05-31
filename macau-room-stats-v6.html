@@ -626,6 +626,10 @@
                     <span class="s-value green" id="sumActual">0</span>
                 </div>
                 <div class="summary-row highlight">
+                    <span class="s-label">總計晚數</span>
+                    <span class="s-value" id="sumNights">0</span>
+                </div>
+                <div class="summary-row highlight">
                     <span class="s-label">達標率</span>
                     <span class="s-value" id="sumRate">0%</span>
                 </div>
@@ -1393,6 +1397,7 @@
         document.getElementById('sumAmount').textContent = totalAmount.toLocaleString();
         document.getElementById('sumNeed').textContent = totalNeed;
         document.getElementById('sumActual').textContent = totalActual;
+        document.getElementById('sumNights').textContent = totalNights;
         document.getElementById('sumRate').textContent = rate.toFixed(1) + '%';
         document.getElementById('sumDue').textContent = dueAmount.toLocaleString();
 
