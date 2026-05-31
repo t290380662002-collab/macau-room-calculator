@@ -1406,6 +1406,9 @@
                 sel.innerHTML += `<option value="${r.name}">${r.code} ${r.name}</option>`;
             });
         }
+        
+        // 顯示該酒店的送房條件參考
+        showRoomConditionsRef(hotel);
     }
 
     // ========== 自動計算 ==========
@@ -1761,6 +1764,76 @@
     loadLineHeads();
     listenFirebaseRecords();
     renderAll();
-    </script>
+    
+    // 顯示酒店送房條件參考
+    function showRoomConditionsRef(hotel) {
+        let refDiv = document.getElementById('roomConditionsRef');
+        
+        // 如果參考區域不存在，建立它
+        if (!refDiv) {
+            refDiv = document.createElement('div');
+            refDiv.id = 'roomConditionsRef';
+            refDiv.style.marginTop = '20px';
+            
+            // 插入到「新增」頁面末尾
+            const pageAdd = document.getElementById('pageAdd');
+            if (pageAdd) {
+                pageAdd.appendChild(refDiv);
+            } else {
+                // Fallback: 插入到提交按鈕後面
+                const submitBtn = document.querySelector('#pageAdd .btn-primary');
+                if (submitBtn && submitBtn.parentElement) {
+                    submitBtn.parentElement.appendChild(refDiv);
+                }
+            }
+        }
+        
+        if (!hotel || !hotelData[hotel]) {
+            refDiv.innerHTML = '';
+            refDiv.style.display = 'none';
+            return;
+        }
+        
+        const rooms = hotelData[hotel].rooms;
+        const group = hotelData[hotel].group || '';
+        
+        let html = '<div style="padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">';
+        html += '<h4 style="margin: 0 0 10px 0; color: #1a1a1a; font-size: 14px;">📋 ' + hotel + ' - 送房條件參考</h4>';
+        html += '<div style="overflow-x: auto;">';
+        html += '<table style="width: 100%; border-collapse: collapse; font-size: 12px;">';
+        html += '<tr style="background: #e9ecef;">';
+        html += '<th style="padding: 6px 8px; text-align: left; border: 1px solid #dee2e6;">房型代碼</th>';
+        html += '<th style="padding: 6px 8px; text-align: left; border: 1px solid #dee2e6;">房型名稱</th>';
+        html += '<th style="padding: 6px 8px; text-align: center; border: 1px solid #dee2e6;">平日</th>';
+        html += '<th style="padding: 6px 8px; text-align: center; border: 1px solid #dee2e6;">週末</th>';
+        html += '<th style="padding: 6px 8px; text-align: center; border: 1px solid #dee2e6;">特殊日</th>';
+        html += '<th style="padding: 6px 8px; text-align: right; border: 1px solid #dee2e6;">洗碼量</th>';
+        html += '</tr>';
+        
+        rooms.forEach(r => {
+            html += '<tr>';
+            html += '<td style="padding: 6px 8px; border: 1px solid #dee2e6; font-size: 11px;">' + (r.code || '') + '</td>';
+            html += '<td style="padding: 6px 8px; border: 1px solid #dee2e6; font-size: 11px;">' + (r.name || '') + '</td>';
+            html += '<td style="padding: 6px 8px; text-align: center; border: 1px solid #dee2e6;">$' + (r.weekday || 0).toLocaleString() + '</td>';
+            html += '<td style="padding: 6px 8px; text-align: center; border: 1px solid #dee2e6;">$' + (r.weekend || 0).toLocaleString() + '</td>';
+            html += '<td style="padding: 6px 8px; text-align: center; border: 1px solid #dee2e6;">$' + (r.premium || 0).toLocaleString() + '</td>';
+            
+            let washText = '';
+            if (r.wash) {
+                washText = r.wash.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            html += '<td style="padding: 6px 8px; text-align: right; border: 1px solid #dee2e6; font-size: 11px;">' + washText + '</td>';
+            html += '</tr>';
+        });
+        
+        html += '</table>';
+        html += '</div>';
+        html += '</div>';
+        
+        refDiv.innerHTML = html;
+        refDiv.style.display = 'block';
+    }
+
+</script>
 </body>
 </html>
