@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>澳門酒店房費統計 v6.0.1 (Firebase同步) - 2026-05-31</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, 'Microsoft JhengHei', sans-serif;
+            background: #0f0f1a;
+            color: #e0e0e0;
+            padding: 12px;
+            font-size: 14px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .container { max-width: 960px; margin: 0 auto; }
+
+        @media (max-width: 768px) {
+            .container { max-width: 100%; }
+        }
+
+        /* 標題 */
+        .header {
+            text-align: center;
+            margin-bottom: 14px;
+        }
+        .header h1 {
+            color: #ffd700;
+            font-size: 1.3em;
+            text-shadow: 0 0 12px rgba(255,215,0,0.4);
+        }
+        .header .sub {
+            color: #888;
+            font-size: 0.8em;
+            margin-top: 2px;
+        }
+
+        /* 線頭篩選 */
+        .linehead-filter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .linehead-filter .filter-label {
+            color: #888;
+            font-size: 0.85em;
+        }
+        .linehead-filter select {
+            padding: 5px 12px;
+            border: 1px solid rgba(255,215,0,0.3);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.06);
+            color: #ffd700;
+            font-size: 0.85em;
+            outline: none;
+            min-width: 100px;
+        }
+        .linehead-filter select:focus {
+            border-color: #ffd700;
+        }
+        .linehead-filter select option {
+            background: #1a1a2e;
+            color: #e0e0e0;
+        }
+
+        /* 月份切換 */
+        .month-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 14px;
+            position: relative;
+        }
+        .month-nav button {
+            background: rgba(255,215,0,0.15);
+            border: 1px solid rgba(255,215,0,0.3);
+            color: #ffd700;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .month-nav button:active { background: rgba(255,215,0,0.3); }
+        .month-nav .month-label {
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .month-nav .month-picker {
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .month-nav .month-picker:hover {
+            background: rgba(255,215,0,0.2);
+        }
+        .month-picker-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 12px;
+            z-index: 100;
+            min-width: 220px;
+        }
+        .mp-year-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .mp-year-nav button {
+            background: rgba(255,215,0,0.2);
+            border: none;
+            color: #fff;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .mp-months {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+        .mp-months span {
+            text-align: center;
+            padding: 6px 4px;
+            border-radius: 6px;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.15s;
+        }
+        .mp-months span:hover {
+            background: rgba(255,215,0,0.2);
+            color: #fff;
+        }
+        .mp-months span.mp-active {
+            background: #d4af37;
+            color: #000;
+            font-weight: bold;
+        }
+        .mp-quick-btns {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .mp-quick {
+            flex: 1;
+            padding: 6px 4px;
+            border: 1px solid #555;
+            border-radius: 6px;
+            background: transparent;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.15s;
+        }
+        .mp-quick:hover {
+            background: rgba(255,215,0,0.2);
+            color: #fff;
+            border-color: #d4af37;
+        }
+        .mp-quick.mp-q-active {
+            background: rgba(212,175,55,0.25);
+            color: #d4af37;
+            border-color: #d4af37;
+            font-weight: bold;
+        }
+        .mp-date-range {
+            margin-top: 10px;
+            border-top: 1px solid #333;
+            padding-top: 10px;
+        }
+        .mp-date-title {
+            color: #999;
+            font-size: 0.8em;
+            margin-bottom: 6px;
+        }
+        .mp-date-inputs {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .mp-date-inputs input {
+            flex: 1;
+            padding: 4px 6px;
+            border: 1px solid #555;
+            border-radius: 6px;
+            background: #1a1a2e;
+            color: #fff;
+            font-size: 0.85em;
+        }
+        .mp-date-inputs span {
+            color: #888;
+        }
+        .mp-date-ok {
+            width: 100%;
+            margin-top: 6px;
+            padding: 6px;
+            border: 1px solid #555;
+            border-radius: 6px;
+            background: rgba(212,175,55,0.15);
+            color: #d4af37;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.15s;
+        }
+        .mp-date-ok:hover {
+            background: rgba(212,175,55,0.3);
+        }
+
+        /* 統計卡片區 */
+        .stats-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .stat-card {
+            flex: 0 0 auto;
+            min-width: 110px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px 12px;
+            text-align: center;
+        }
+        .stat-card .label {
+            font-size: 0.75em;
+            color: #8888;
+            margin-bottom: 4px;
+        }
+        .stat-card .value {
+            font-size: 1.15em;
+            font-weight: bold;
+        }
+        .stat-card .value.gold { color: #ffd700; }
+        .stat-card .value.red { color: #ff4d4d; }
+        .stat-card .value.green { color: #2ecc71; }
+        .stat-card .value.blue { color: #4da6ff; }
+
+        /* Tab 切換 */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 8px 4px;
+            text-align: center;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: rgba(255,215,0,0.2);
+            border-color: rgba(255,215,0,0.5);
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        /* 卡片 */
+        .card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .card-title {
+            color: #ffd700;
+            font-size: 0.95em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 表單 */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .form-grid .full { grid-column: 1 / -1; }
+        .form-group { display: flex; flex-direction: column; gap: 3px; }
+        .form-group label {
+            font-size: 0.75em;
+            color: #8888;
+        }
+        .form-group input,
+        .form-group select {
+            padding: 7px 8px;
+            border: 1px solid rgba(255,215,0,0.2);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 0.85em;
+            outline: none;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #ffd700;
+            background: rgba(255,215,0,0.08);
+        }
+        select option { background: #1a1a2e; color: #fff; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 9px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.95em;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .btn-submit:active { opacity: 0.8; }
+
+        /* 表格 */
+        .table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8em;
+        }
+        th {
+            background: rgba(255,215,0,0.15);
+            color: #ffd700;
+            padding: 7px 6px;
+            text-align: center;
+            font-size: 0.9em;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+        }
+        td {
+            padding: 6px 4px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            white-space: nowrap;
+        }
+        tr:hover { background: rgba(255,215,0,0.05); }
+        .col-linehead { text-align: center; color: #4da6ff; font-weight: bold; }
+        .col-name { text-align: center; color: #4da6ff; font-weight: bold; }
+        .col-hotel { color: #ffd700; }
+        .col-detail { color: #aaa; font-size: 0.85em; }
+        .col-amount { color: #ff6b6b; font-weight: bold; }
+        .col-need { color: #f1c40f; }
+        .col-actual { color: #2ecc71; }
+
+        /* 操作按鈕 */
+        .op-btn {
+            padding: 3px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            margin: 0 2px;
+        }
+        .op-edit { background: rgba(255,215,0,0.2); color: #ffd700; }
+        .op-del { background: rgba(231,76,60,0.2); color: #ff6b6b; }
+
+        /* 底部統計 */
+        .summary-card {
+            background: rgba(255,215,0,0.06);
+            border: 1px solid rgba(255,215,0,0.15);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.9em;
+        }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-row .s-label { color: #aaa; }
+        .summary-row .s-value { font-weight: bold; }
+        .summary-row .s-value.gold { color: #ffd700; }
+        .summary-row .s-value.red { color: #ff4d4d; }
+        .summary-row .s-value.green { color: #2ecc71; }
+        .summary-row.highlight {
+            background: rgba(255,215,0,0.08);
+            margin: 0 -12px;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+        .summary-row.highlight-yellow {
+            background: rgba(241,196,15,0.1);
+            margin: 0 -12px;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        /* 空狀態 */
+        .empty-state {
+            text-align: center;
+            color: #555;
+            padding: 30px 10px;
+            font-size: 0.9em;
+        }
+
+        /* 頁面隱藏 */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* 底部操作 */
+        .bottom-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .bottom-actions button {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.06);
+            color: #aaa;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        .bottom-actions button:active { background: rgba(255,255,255,0.1); }
+        .bottom-actions .btn-export { border-color: rgba(46,204,113,0.3); color: #2ecc71; }
+        .bottom-actions .btn-clear { border-color: rgba(231,76,60,0.3); color: #ff6b6b; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: #1a1a2e;
+            border: 1px solid rgba(255,215,0,0.3);
+            border-radius: 12px;
+            padding: 16px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-box h3 { color: #ffd700; margin-bottom: 12px; font-size: 1em; }
+
+        /* 線頭管理列表 */
+        .linehead-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-size: 0.9em;
+        }
+        .linehead-item .lh-name { color: #4da6ff; font-weight: bold; }
+        .linehead-item .lh-del {
+            padding: 3px 8px;
+            background: rgba(231,76,60,0.2);
+            color: #ff6b6b;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 標題 -->
+        <div class="header">
+            <h1>🏨 澳門酒店房費統計 v6.0</h1>
+            <div class="sub">房費統計 · 達標計算 · 洗碼管理 <span id="syncStatus" style="color:#2ecc71;font-size:0.85em;margin-left:4px;">● 雲端同步中</span></div>
+        </div>
+
+        <!-- 月份導航 -->
+        <div class="month-nav">
+            <button onclick="changeMonth(-1)">◀</button>
+            <button class="month-label month-picker" id="monthLabel" onclick="openMonthPicker()">2025年6月</button>
+            <div id="monthPicker" class="month-picker-dropdown" style="display:none">
+                <div class="mp-quick-btns">
+                    <button class="mp-quick" onclick="mpQuick('thisWeek')">📆 本週</button> 
+                    <button class="mp-quick" onclick="mpQuick('lastWeek')">📋 上週</button>
+                </div>
+                <div class="mp-year-nav">
+                    <button onclick="mpYear(-1)">◀</button>
+                    <span id="mpYearLabel">2026</span>
+                    <button onclick="mpYear(1)">▶</button>
+                </div>
+                <div class="mp-months">
+                    <span onclick="mpSelect(1)">1月</span><span onclick="mpSelect(2)">2月</span><span onclick="mpSelect(3)">3月</span><span onclick="mpSelect(4)">4月</span><span onclick="mpSelect(5)">5月</span><span onclick="mpSelect(6)">6月</span><span onclick="mpSelect(7)">7月</span><span onclick="mpSelect(8)">8月</span><span onclick="mpSelect(9)">9月</span><span onclick="mpSelect(10)">10月</span><span onclick="mpSelect(11)">11月</span><span onclick="mpSelect(12)">12月</span>
+                </div>
+                <div class="mp-date-range">
+                    <div class="mp-date-title">自訂日期範圍</div>
+                    <div class="mp-date-inputs">
+                        <input type="date" id="mpDateFrom" />
+                        <span>~</span>
+                        <input type="date" id="mpDateTo" />
+                    </div>
+                    <button class="mp-date-ok" onclick="mpDateRange()">確定</button>
+                </div>
+            </div>
+            <button onclick="changeMonth(1)">▶</button>
+        </div>
+
+        <!-- 線頭篩選 -->
+        <div class="linehead-filter">
+            <span class="filter-label">線頭:</span>
+            <select id="lineheadFilterSel" onchange="setFilter(this.value)">
+                <option value="" selected>全部</option>
+            </select>
+        </div>
+
+        <!-- 統計卡片 -->
+        <div class="stats-row" id="statsRow">
+            <div class="stat-card">
+                <div class="label">訂房總費</div>
+                <div class="value gold" id="statTotalAmount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">需洗碼量</div>
+                <div class="value blue" id="statNeedWash">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">開工洗碼</div>
+                <div class="value green" id="statActualWash">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">總計晚數</div>
+                <div class="value" id="statNights">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">達標率</div>
+                <div class="value" id="statRate">0%</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">應付房費</div>
+                <div class="value" id="statDue">0</div>
+            </div>
+        </div>
+
+        <!-- Tab -->
+        <div class="tabs">
+            <div class="tab-btn active" onclick="switchTab('add')">➕ 新增</div>
+            <div class="tab-btn" onclick="switchTab('records')">📋 房費記錄</div>
+            <div class="tab-btn" onclick="switchTab('overview')">📊 總覽</div>
+            <div class="tab-btn" onclick="switchTab('conditions')">🎁 送房條件</div>
+        </div>
+
+        <!-- 頁面:房費記錄 -->
+        <div id="page-records" class="page">
+            <div class="card">
+                <div class="card-title">📋 房費記錄</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>線頭</th>
+                                <th>姓名</th>
+                                <th>入住</th>
+                                <th>退房</th>
+                                <th>酒店</th>
+                                <th>房型</th>
+                                <th>明細</th>
+                                <th>金額</th>
+                                <th>需洗碼</th>
+                                <th>開工洗碼</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recordsBody"></tbody>
+                    </table>
+                </div>
+                <div class="empty-state" id="emptyRecords">尚無記錄,點擊「➕ 新增」添加</div>
+            </div>
+
+            <!-- 底部統計 -->
+            <div class="summary-card" id="summaryCard" style="display:none;">
+                <div class="summary-row">
+                    <span class="s-label">總計金額</span>
+                    <span class="s-value gold" id="sumAmount">0</span>
+                </div>
+                <div class="summary-row">
+                    <span class="s-label">需洗碼量</span>
+                    <span class="s-value blue" id="sumNeed">0</span>
+                </div>
+                <div class="summary-row">
+                    <span class="s-label">開工洗碼量</span>
+                    <span class="s-value green" id="sumActual">0</span>
+                </div>
+                <div class="summary-row highlight">
+                    <span class="s-label">總計晚數</span>
+                    <span class="s-value" id="sumNights">0</span>
+                </div>
+                <div class="summary-row highlight">
+                    <span class="s-label">達標率</span>
+                    <span class="s-value" id="sumRate">0%</span>
+                </div>
+                <div class="summary-row highlight-yellow">
+                    <span class="s-label">應付房費</span>
+                    <span class="s-value" id="sumDue">0</span>
+                </div>
+            </div>
+
+            <div class="bottom-actions">
+                <button class="btn-export" onclick="exportExcel()">📤 匯出Excel</button>
+                <button class="btn-clear" onclick="clearMonth()">🗑️ 清空本月</button>
+            </div>
+        </div>
+
+        <!-- 頁面:新增記錄 -->
+        <div id="page-add" class="page active">
+            <div class="card">
+                <div class="card-title">➕ 新增房費記錄</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>線頭 <span style="font-size:0.8em;color:#4da6ff;cursor:pointer;" onclick="openLineHeadModal()">[管理]</span></label>
+                        <div style="display:flex;gap:6px;">
+                            <select id="fLineHead" style="flex:0 0 90px;"></select>
+                            <input type="text" id="fName" placeholder="名字" style="flex:1;">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>酒店</label>
+                        <select id="fHotel" onchange="updateRoomTypes();triggerAutoCalc();">
+                            <option value="">選擇酒店</option>
+                            <option value="摩珀斯">摩珀斯</option>
+                            <option value="映星匯">映星匯</option>
+                            <option value="康萊德">康萊德</option>
+                            <option value="倫敦人">倫敦人</option>
+                            <option value="名匯">名匯</option>
+                            <option value="御園">御園</option>
+                            <option value="頤居">頤居</option>
+                            <option value="銀河">銀河</option>
+                            <option value="大倉">大倉</option>
+                            <option value="悅榕莊">悅榕莊</option>
+                            <option value="萬豪">萬豪</option>
+                            <option value="麗絲卡爾頓">麗絲卡爾頓</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>入住日</label>
+                        <input type="date" id="fCheckIn" onchange="triggerAutoCalc();">
+                    </div>
+                    <div class="form-group">
+                        <label>退房日</label>
+                        <input type="date" id="fCheckOut" onchange="triggerAutoCalc();">
+                    </div>
+                    <div class="form-group">
+                        <label>房型</label>
+                        <select id="fRoomType" onchange="triggerAutoCalc();">
+                            <option value="">先選酒店</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label>⚡ 明細(選擇後自動計算)</label>
+                        <input type="text" id="fDetail" placeholder="選擇酒店+房型+日期後自動填入">
+                    </div>
+                    <div class="form-group">
+                        <label>金額(自動計算)</label>
+                        <input type="number" id="fAmount" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label>需洗碼量(自動計算)</label>
+                        <input type="number" id="fNeedWash" placeholder="0">
+                    </div>
+                    <div class="form-group full">
+                        <label>開工洗碼量</label>
+                        <input type="number" id="fActualWash" placeholder="0">
+                    </div>
+                </div>
+                <button class="btn-submit" onclick="addRecord()">提交</button>
+            </div>
+        </div>
+
+        <!-- 頁面:總覽 -->
+        <div id="page-overview" class="page">
+            <div class="card">
+                <div class="card-title">📊 按客戶彙總</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>線頭</th>
+                                <th>姓名</th>
+                                <th>筆數</th>
+                                <th>金額</th>
+                                <th>需洗碼</th>
+                                <th>開工洗碼</th>
+                                <th>達標率</th>
+                            </tr>
+                        </thead>
+                        <tbody id="overviewBody"></tbody>
+                    </table>
+                </div>
+                <div class="empty-state" id="emptyOverview">尚無數據</div>
+            </div>
+        </div>
+
+        <!-- 頁面:送房條件 -->
+        <div id="page-conditions" class="page">
+            <div class="card">
+                <div class="card-title">🎁 新濠系送房條件</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>酒店</th><th>Code</th><th>房型</th><th>平日</th><th>週五/六</th><th>特殊日</th><th>洗碼量</th></tr>
+                        </thead>
+                        <tbody id="condMelco"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">🎁 金沙系送房條件</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>酒店</th><th>Code</th><th>房型</th><th>平日</th><th>週五/六</th><th>特殊日</th><th>洗碼量</th></tr>
+                        </thead>
+                        <tbody id="condSands"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">🎁 銀河系送房條件</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>酒店</th><th>Code</th><th>房型</th><th>平日</th><th>週五/六</th><th>特殊日</th><th>洗碼量</th></tr>
+                        </thead>
+                        <tbody id="condGalaxy"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 線頭管理 Modal -->
+    <div class="modal-overlay" id="lineHeadModal">
+        <div class="modal-box">
+            <h3>⚙️ 管理線頭</h3>
+            <div style="display:flex;gap:6px;margin-bottom:12px;">
+                <input type="text" id="newLineHead" placeholder="新增線頭(如:馬)" style="flex:1;padding:7px 8px;border:1px solid rgba(255,215,0,0.2);border-radius:6px;background:rgba(255,255,255,0.05);color:#fff;font-size:0.85em;">
+                <button onclick="addLineHead()" style="padding:7px 12px;background:rgba(46,204,113,0.2);border:1px solid rgba(46,204,113,0.3);color:#2ecc71;border-radius:6px;cursor:pointer;">新增</button>
+            </div>
+            <div id="lineHeadList"></div>
+            <button onclick="closeLineHeadModal()" style="margin-top:12px;width:100%;padding:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#aaa;border-radius:6px;cursor:pointer;">關閉</button>
+        </div>
+    </div>
+
+    <!-- 編輯 Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-box">
+            <h3>✏️ 編輯記錄</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>線頭</label>
+                    <input type="text" id="eLineHead">
+                </div>
+                <div class="form-group">
+                    <label>姓名</label>
+                    <input type="text" id="eName">
+                </div>
+                <div class="form-group">
+                    <label>酒店</label>
+                    <input type="text" id="eHotel">
+                </div>
+                <div class="form-group">
+                    <label>入住日</label>
+                    <input type="date" id="eCheckIn">
+                </div>
+                <div class="form-group">
+                    <label>退房日</label>
+                    <input type="date" id="eCheckOut">
+                </div>
+                <div class="form-group">
+                    <label>房型</label>
+                    <input type="text" id="eRoomType">
+                </div>
+                <div class="form-group">
+                    <label>明細</label>
+                    <input type="text" id="eDetail">
+                </div>
+                <div class="form-group">
+                    <label>金額</label>
+                    <input type="number" id="eAmount">
+                </div>
+                <div class="form-group">
+                    <label>需洗碼量</label>
+                    <input type="number" id="eNeedWash">
+                </div>
+                <div class="form-group full">
+                    <label>開工洗碼量</label>
+                    <input type="number" id="eActualWash">
+                </div>
+            </div>
+            <button class="btn-submit" onclick="saveEdit()" style="margin-top:10px;">儲存</button>
+            <button class="btn-submit" onclick="closeEdit()" style="background:#555;margin-top:6px;">取消</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
+    <script>
+    // ========== Firebase 配置 ==========
+    const firebaseConfig = {
+        apiKey: "AIzaSyCXIFVxzuN8_ROtRRXl5wZv5xU_2oAw2PY",
+        authDomain: "macau-168.firebaseapp.com",
+        databaseURL: "https://macau-168-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "macau-168",
+        storageBucket: "macau-168.firebasestorage.app",
+        messagingSenderId: "172589695649",
+        appId: "1:172589695649:web:371ab4a510aed1af71e6e0"
+    };
+
+    let db = null;
+    let firebaseReady = false;
+    let isRemoteUpdate = false; // 防止循環觸發
+
+    try {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+        firebaseReady = true;
+        console.log('✅ Firebase 連接成功');
+    } catch(e) {
+        console.warn('⚠️ Firebase 連接失敗,使用離線模式:', e.message);
+        firebaseReady = false;
+    }
+
+    // ========== 線頭管理 ==========
+    let lineHeads = ['馬', '牛', '江', '杰'];
+    // currentEditIndex 已廢棄,改用 currentEditId
+    let currentFilter = ''; // 空字串=全部
+
+    function loadLineHeads() {
+        const saved = localStorage.getItem('macau_lineheads');
+        if (saved) {
+            lineHeads = JSON.parse(saved);
+        }
+        updateLineHeadSelect();
+
+        // 從 Firebase 同步線頭
+        if (firebaseReady && db) {
+            db.ref('lineheads').on('value', snap => {
+                const val = snap.val();
+                if (val && Array.isArray(val) && !isRemoteUpdate) {
+                    lineHeads = val;
+                    localStorage.setItem('macau_lineheads', JSON.stringify(lineHeads));
+                    updateLineHeadSelect();
+                    renderLineHeadList();
+                }
+            });
+        }
+    }
+
+    function saveLineHeads() {
+        localStorage.setItem('macau_lineheads', JSON.stringify(lineHeads));
+        if (firebaseReady && db) {
+            db.ref('lineheads').set(lineHeads).catch(e => console.warn('同步線頭失敗:', e.message));
+        }
+    }
+
+    function updateLineHeadSelect() {
+        const sel = document.getElementById('fLineHead');
+        sel.innerHTML = '';
+        lineHeads.forEach(lh => {
+            sel.innerHTML += `<option value="${lh}">${lh}</option>`;
+        });
+        // 更新篩選按鈕
+        renderFilterButtons();
+    }
+
+    function renderFilterButtons() {
+        const sel = document.getElementById('lineheadFilterSel');
+        if (!sel) return;
+        const prevVal = sel.value;
+        sel.innerHTML = '<option value=""' + (currentFilter===''?' selected':'') + '>全部</option>';
+        lineHeads.forEach(lh => {
+            sel.innerHTML += '<option value="' + lh + '"' + (currentFilter===lh?' selected':'') + '>' + lh + '</option>';
+        });
+        sel.value = prevVal || currentFilter;
+    }
+
+    function setFilter(lh) {
+        currentFilter = lh;
+        renderFilterButtons();
+        renderAll();
+    }
+
+    function getFilteredRecords() {
+        const records = loadRecords();
+        if (!currentFilter) return records;
+        return records.filter(r => (r.lineHead || '') === currentFilter);
+    }
+
+    function openLineHeadModal() {
+        renderLineHeadList();
+        document.getElementById('lineHeadModal').classList.add('show');
+    }
+
+    function closeLineHeadModal() {
+        document.getElementById('lineHeadModal').classList.remove('show');
+    }
+
+    function renderLineHeadList() {
+        const list = document.getElementById('lineHeadList');
+        list.innerHTML = '';
+        lineHeads.forEach((lh, i) => {
+            list.innerHTML += `
+                <div class="linehead-item">
+                    <span class="lh-name">${lh}</span>
+                    <button class="lh-del" onclick="delLineHead(${i})">刪除</button>
+                </div>
+            `;
+        });
+    }
+
+    function addLineHead() {
+        const input = document.getElementById('newLineHead');
+        const val = input.value.trim();
+        if (!val) return alert('請輸入線頭名稱');
+        if (lineHeads.includes(val)) return alert('線頭已存在');
+        lineHeads.push(val);
+        saveLineHeads();
+        updateLineHeadSelect();
+        renderLineHeadList();
+        input.value = '';
+    }
+
+    function delLineHead(index) {
+        if (!confirm(`確定刪除線頭「${lineHeads[index]}」?`)) return;
+        lineHeads.splice(index, 1);
+        saveLineHeads();
+        updateLineHeadSelect();
+        renderLineHeadList();
+    }
+
+    // ========== 資料定義 ==========
+    const specialDates = [];
+    let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth() + 1;
+
+    
+    
+    const hotelData = {
+        // ========== Melco Group (新濠系) ==========
+        "摩珀斯": {
+            rooms: [
+                { code: "MPK", name: "摩珀斯套房(大床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "MPPK", name: "摩珀斯套房(雙床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "MPT", name: "摩珀斯豪華套房", weekday: 2700, weekend: 3000, premium: 4200, wash: 180 },
+                { code: "MCPT", name: "摩珀斯2房套房", weekday: 4200, weekend: 4500, premium: 6000, wash: 300 },
+                { code: "MPS", name: "摩珀斯3房套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 1000 },
+                { code: "MES", name: "摩珀斯總統套房", weekday: 10000, weekend: 11000, premium: 13000, wash: 3000 }
+            ],
+            group: "melco"
+        },
+        "頤居": {
+            rooms: [
+                { code: "NPK", name: "頤居客房(大床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "NPKV", name: "頤居客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "NPQ", name: "頤居豪華客房", weekday: 1800, weekend: 2000, premium: 3000, wash: 180 },
+                { code: "NPQV", name: "頤居豪華客房(雙床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 180 },
+                { code: "NDS", name: "頤居套房", weekday: 3000, weekend: 3200, premium: 4500, wash: 300 },
+                { code: "NCDS", name: "頤居豪華套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 1000 },
+                { code: "NPS", name: "頤居2房套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 3000 },
+                { code: "NPSV", name: "頤居3房套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 3000 }
+            ],
+            group: "melco"
+        },
+        "明星匯": {
+            rooms: [
+                { code: "CRK", name: "明星匯客房(大床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "CRT", name: "明星匯客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "CDK", name: "明星匯豪華客房", weekday: 1800, weekend: 2000, premium: 3000, wash: 180 },
+                { code: "CDT", name: "明星匯豪華客房(雙床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 180 },
+                { code: "CSS", name: "明星匯套房", weekday: 3000, weekend: 3200, premium: 4500, wash: 300 },
+                { code: "SDK", name: "明星匯豪華套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 1000 }
+            ],
+            group: "melco"
+        },
+        "巨星匯": {
+            rooms: [
+                { code: "SDT", name: "巨星匯客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "STS", name: "巨星匯套房", weekday: 3000, weekend: 3200, premium: 4500, wash: 300 },
+                { code: "SPS", name: "巨星匯豪華套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 1000 },
+                { code: "SGS", name: "巨星匯總統套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 3000 }
+            ],
+            group: "melco"
+        },
+        "映星匯": {
+            rooms: [
+                { code: "EDK", name: "映星匯客房(大床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "EDT", name: "映星匯客房(雙床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "EG1", name: "映星匯套房", weekday: 2700, weekend: 3000, premium: 4200, wash: 180 },
+                { code: "ES1", name: "映星匯豪華套房", weekday: 4200, weekend: 4500, premium: 6000, wash: 300 },
+                { code: "EO1", name: "映星匯行政套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 1000 },
+                { code: "EG2", name: "映星匯2房套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 3000 },
+                { code: "ES2", name: "映星匯3房套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 3000 },
+                { code: "EP3", name: "映星匯頂層套房", weekday: 15000, weekend: 16000, premium: 18000, wash: 3000 }
+            ],
+            group: "melco"
+        },
+        "君悅": {
+            rooms: [
+                { code: "KING", name: "君悅客房(大床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "TWIN", name: "君悅客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "DLXK", name: "君悅豪華客房(大床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 180 },
+                { code: "DLXT", name: "君悅豪華客房(雙床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 180 },
+                { code: "CLDK", name: "君悅套房(大床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 300 },
+                { code: "CLDT", name: "君悅套房(雙床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 300 },
+                { code: "GRSK", name: "君悅豪華套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 1000 },
+                { code: "GRXS", name: "君悅行政套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 3000 },
+                { code: "PREM", name: "君悅總理套房", weekday: 10000, weekend: 11000, premium: 13000, wash: 3000 },
+                { code: "DIPL", name: "君悅外交官套房", weekday: 15000, weekend: 16000, premium: 18000, wash: 3000 },
+                { code: "PRES", name: "君悅總統套房", weekday: 20000, weekend: 22000, premium: 25000, wash: 3000 },
+                { code: "CHHN", name: "君悅主席套房", weekday: 30000, weekend: 32000, premium: 35000, wash: 3000 }
+            ],
+            group: "melco"
+        },
+        // ========== Sands Group (金沙系) ==========
+        "名匯": {
+            rooms: [
+                { code: "R2", name: "名匯客房(大床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 60 },
+                { code: "RK", name: "名匯客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 60 },
+                { code: "V2", name: "名匯豪華客房(大床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 150 },
+                { code: "VK", name: "名匯豪華客房(雙床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 150 },
+                { code: "LS2", name: "名匯套房(大床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 150 },
+                { code: "LSK", name: "名匯套房(雙床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 150 },
+                { code: "GS2", name: "名匯行政套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 300 },
+                { code: "GSK", name: "名匯行政套房(雙床)", weekday: 4500, weekend: 5000, premium: 6500, wash: 300 },
+                { code: "CS2", name: "名匯主席套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 300 },
+                { code: "GC2", name: "名匯總理套房", weekday: 10000, weekend: 11000, premium: 13000, wash: 300 },
+                { code: "TS", name: "名匯總統套房", weekday: 15000, weekend: 16000, premium: 18000, wash: 300 }
+            ],
+            group: "sands"
+        },
+        "倫敦人": {
+            rooms: [
+                { code: "KC", name: "倫敦人客房(大床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 60 },
+                { code: "TC", name: "倫敦人客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 60 },
+                { code: "KS", name: "倫敦人套房(大床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 150 },
+                { code: "TS", name: "倫敦人套房(雙床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 150 },
+                { code: "DBK1", name: "倫敦人雙床套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 150 },
+                { code: "DBKD2", name: "倫敦人2房套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 300 },
+                { code: "DBKQD3", name: "倫敦人3房套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 300 }
+            ],
+            group: "sands"
+        },
+        "御園": {
+            rooms: [
+                { code: "CM1", name: "御園客房(大床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 150 },
+                { code: "CG1", name: "御園客房(雙床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 150 },
+                { code: "CGD1", name: "御園豪華客房(大床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 150 },
+                { code: "CMD1", name: "御園豪華客房(雙床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 150 },
+                { code: "CK2", name: "御園套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 300 },
+                { code: "CKD2", name: "御園2房套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 300 },
+                { code: "CV3", name: "御園3房套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 300 },
+                { code: "CVS4", name: "御園4房套房", weekday: 10000, weekend: 11000, premium: 13000, wash: 300 }
+            ],
+            group: "sands"
+        },
+        // ========== Galaxy Group (銀河系) ==========
+        "銀河": {
+            rooms: [
+                { code: "GM01", name: "銀河客房(大床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "GM01T", name: "銀河客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "GM04", name: "銀河豪華客房", weekday: 1800, weekend: 2000, premium: 3000, wash: 200 },
+                { code: "GM06", name: "銀河套房", weekday: 3000, weekend: 3200, premium: 4500, wash: 400 },
+                { code: "GM07", name: "銀河豪華套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 400 },
+                { code: "GM08", name: "銀河總統套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 400 }
+            ],
+            group: "galaxy"
+        },
+        "大倉": {
+            rooms: [
+                { code: "OK01", name: "大倉客房(大床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "OK02", name: "大倉客房(雙床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "OK03", name: "大倉豪華客房", weekday: 2700, weekend: 3000, premium: 4200, wash: 200 },
+                { code: "OK05", name: "大倉套房", weekday: 4200, weekend: 4500, premium: 6000, wash: 400 },
+                { code: "OK06", name: "大倉豪華套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 400 },
+                { code: "OK07", name: "大倉總統套房", weekday: 10000, weekend: 11000, premium: 13000, wash: 400 }
+            ],
+            group: "galaxy"
+        },
+        "悅榕莊": {
+            rooms: [
+                { code: "BT01", name: "悅榕莊客房(大床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 80 },
+                { code: "BT02", name: "悅榕莊客房(雙床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 80 },
+                { code: "BT03", name: "悅榕莊套房", weekday: 3000, weekend: 3200, premium: 4500, wash: 200 },
+                { code: "BT05", name: "悅榕莊別墅", weekday: 8000, weekend: 8500, premium: 10000, wash: 400 },
+                { code: "BT06", name: "悅榕莊海景別墅", weekday: 10000, weekend: 11000, premium: 13000, wash: 400 }
+            ],
+            group: "galaxy"
+        },
+        "萬豪": {
+            rooms: [
+                { code: "JW01", name: "萬豪客房(大床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "JW02", name: "萬豪客房(雙床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "JW03", name: "萬豪豪華客房", weekday: 2700, weekend: 3000, premium: 4200, wash: 200 },
+                { code: "JW05", name: "萬豪套房", weekday: 4200, weekend: 4500, premium: 6000, wash: 200 },
+                { code: "JW06", name: "萬豪行政套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 200 },
+                { code: "JW08", name: "萬豪總統套房", weekday: 15000, weekend: 16000, premium: 18000, wash: 200 }
+            ],
+            group: "galaxy"
+        },
+        "麗絲卡爾頓": {
+            rooms: [
+                { code: "RC01", name: "麗絲卡爾頓客房(大床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 200 },
+                { code: "RC03", name: "麗絲卡爾頓客房(雙床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 200 },
+                { code: "RC05", name: "麗絲卡爾頓套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 200 },
+                { code: "RC06", name: "麗絲卡爾頓豪華套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 200 },
+                { code: "RC07", name: "麗絲卡爾頓總統套房", weekday: 15000, weekend: 16000, premium: 18000, wash: 200 }
+            ],
+            group: "galaxy"
+        }
+    };
+
+
+
+    // ========== 儲存(統一存所有記錄,按入住日期篩選月份) ==========
+    const STORAGE_KEY = 'macau_rooms_all';
+
+    function loadAllRecords() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        let records = saved ? JSON.parse(saved) : [];
+        // 為舊記錄補上 _id
+        let changed = false;
+        records.forEach(r => {
+            if (!r._id) {
+                r._id = Date.now() + '_' + Math.random().toString(36).substr(2,6);
+                changed = true;
+            }
+        });
+        if (changed) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        }
+        return records;
+    }
+
+    // 根據入住日期篩選當前月份的記錄
+    function loadRecords() {
+        const all = loadAllRecords();
+        if (dateMode === 'month') {
+            return all.filter(r => {
+                if (!r.checkIn) return false;
+                const d = new Date(r.checkIn);
+                return d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth;
+            });
+        }
+        if (dateMode === 'thisWeek') {
+            const now = new Date();
+            const day = now.getDay() || 7;
+            const mon = new Date(now); mon.setDate(now.getDate() - day + 1); mon.setHours(0,0,0,0);
+            const sun = new Date(mon); sun.setDate(mon.getDate() + 6); sun.setHours(23,59,59,999);
+            return all.filter(r => {
+                if (!r.checkIn) return false;
+                const d = new Date(r.checkIn);
+                return d >= mon && d <= sun;
+            });
+        }
+        if (dateMode === 'lastWeek') {
+            const now = new Date();
+            const day = now.getDay() || 7;
+            const lastMon = new Date(now); lastMon.setDate(now.getDate() - day - 6); lastMon.setHours(0,0,0,0);
+            const lastSun = new Date(lastMon); lastSun.setDate(lastMon.getDate() + 6); lastSun.setHours(23,59,59,999);
+            return all.filter(r => {
+                if (!r.checkIn) return false;
+                const d = new Date(r.checkIn);
+                return d >= lastMon && d <= lastSun;
+            });
+        }
+        if (dateMode === 'custom') {
+            const from = new Date(customDateFrom); from.setHours(0,0,0,0);
+            const to = new Date(customDateTo); to.setHours(23,59,59,999);
+            return all.filter(r => {
+                if (!r.checkIn) return false;
+                const d = new Date(r.checkIn);
+                return d >= from && d <= to;
+            });
+        }
+        return all;
+    }
+
+    // 監聽 Firebase 即時更新
+    function listenFirebaseRecords() {
+        if (!firebaseReady || !db) return;
+        db.ref('records/all').off('value');
+        db.ref('records/all').on('value', snap => {
+            const val = snap.val();
+            isRemoteUpdate = true;
+            if (val && Array.isArray(val)) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(val));
+            } else {
+                localStorage.removeItem(STORAGE_KEY);
+            }
+            renderAll();
+            setTimeout(() => { isRemoteUpdate = false; }, 100);
+        });
+    }
+
+    function saveRecords(records) {
+        // records 是當前月份篩選後的,需要合併回全部
+        const all = loadAllRecords();
+        const currentIds = new Set(records.map(r => r._id));
+        // 保留非當月記錄
+        const otherMonths = all.filter(r => !currentIds.has(r._id));
+        const merged = [...otherMonths, ...records];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+        // 同步到 Firebase
+        if (firebaseReady && db && !isRemoteUpdate) {
+            db.ref('records/all').set(merged)
+                .catch(e => console.warn('同步記錄失敗:', e.message));
+        }
+    }
+
+    // ========== 日期篩選模式 ==========
+    // dateMode: 'month' | 'thisWeek' | 'lastWeek' | 'custom'
+    let dateMode = 'month';
+    let customDateFrom = '';
+    let customDateTo = '';
+
+    function mpQuick(mode) {
+        if (mode === 'thisMonth') dateMode = 'month';
+        else dateMode = mode;
+        document.getElementById('monthPicker').style.display = 'none';
+        currentYear = new Date().getFullYear();
+        currentMonth = new Date().getMonth() + 1;
+        renderAll();
+    }
+
+    function mpDateRange() {
+        const from = document.getElementById('mpDateFrom').value;
+        const to = document.getElementById('mpDateTo').value;
+        if (!from || !to) { alert('請選擇起止日期'); return; }
+        dateMode = 'custom';
+        customDateFrom = from;
+        customDateTo = to;
+        document.getElementById('monthPicker').style.display = 'none';
+        renderAll();
+    }
+
+    function mpSelect(m) {
+        dateMode = 'month';
+        currentYear = mpSelectedYear;
+        currentMonth = m;
+        document.getElementById('monthPicker').style.display = 'none';
+        renderAll();
+    }
+
+    function changeMonth(delta) {
+        dateMode = 'month';
+        currentMonth += delta;
+        if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+        if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+        renderAll();
+    }
+
+    function updateMonthLabel() {
+        const el = document.getElementById('monthLabel');
+        if (dateMode === 'month') {
+            el.textContent = `${currentYear}年${currentMonth}月`;
+        } else if (dateMode === 'thisWeek') {
+            const now = new Date();
+            const day = now.getDay() || 7;
+            const mon = new Date(now); mon.setDate(now.getDate() - day + 1);
+            const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+            el.textContent = `${mon.getMonth()+1}/${mon.getDate()} - ${sun.getMonth()+1}/${sun.getDate()}`;
+        } else if (dateMode === 'lastWeek') {
+            const now = new Date();
+            const day = now.getDay() || 7;
+            const lastMon = new Date(now); lastMon.setDate(now.getDate() - day - 6);
+            const lastSun = new Date(lastMon); lastSun.setDate(lastMon.getDate() + 6);
+            el.textContent = `${lastMon.getMonth()+1}/${lastMon.getDate()} - ${lastSun.getMonth()+1}/${lastSun.getDate()}`;
+        } else if (dateMode === 'custom') {
+            el.textContent = customDateFrom + ' ~ ' + customDateTo;
+        }
+    }
+
+    // ========== 原有月份選擇器 ==========
+    let mpSelectedYear = currentYear;
+
+    function openMonthPicker() {
+        console.log('openMonthPicker called');
+        const el = document.getElementById('monthPicker');
+        if (!el) { console.error('monthPicker element not found'); return; }
+        mpSelectedYear = currentYear;
+        renderMonthPicker();
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        console.log('monthPicker display:', el.style.display);
+    }
+
+    function mpYear(delta) {
+        mpSelectedYear += delta;
+        renderMonthPicker();
+    }
+
+    function renderMonthPicker() {
+        document.getElementById('mpYearLabel').textContent = mpSelectedYear;
+        document.querySelectorAll('#monthPicker .mp-months span').forEach((el, i) => {
+            const m = i + 1;
+            if (dateMode === 'month' && mpSelectedYear === currentYear && m === currentMonth) {
+                el.classList.add('mp-active');
+            } else {
+                el.classList.remove('mp-active');
+            }
+        });
+        // 更新快速按鈕高亮
+        document.querySelectorAll('.mp-quick').forEach(b => b.classList.remove('mp-q-active'));
+        if (dateMode === 'month') {
+            const now = new Date();
+            if (currentYear === now.getFullYear() && currentMonth === now.getMonth() + 1) {
+                document.querySelector('.mp-quick[onclick*="thisMonth"]').classList.add('mp-q-active');
+            }
+        } else if (dateMode === 'thisWeek') {
+            document.querySelector('.mp-quick[onclick*="thisWeek"]').classList.add('mp-q-active');
+        } else if (dateMode === 'lastWeek') {
+            document.querySelector('.mp-quick[onclick*="lastWeek"]').classList.add('mp-q-active');
+        }
+    }
+
+    // 點擊外部關閉
+    document.addEventListener('click', e => {
+        const picker = document.getElementById('monthPicker');
+        const label = document.getElementById('monthLabel');
+        if (picker && !picker.contains(e.target) && e.target !== label) {
+            picker.style.display = 'none';
+        }
+    });
+
+    // ========== Tab 切換 ==========
+    function switchTab(name) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        document.getElementById('page-' + name).classList.add('active');
+        event.target.classList.add('active');
+        if (name === 'records') renderRecords();
+        if (name === 'overview') renderOverview();
+        if (name === 'conditions') renderConditions();
+    }
+
+    // ========== 日期判斷 ==========
+    function getDateType(dateStr) {
+        if (specialDates.includes(dateStr)) return 'premium';
+        const d = new Date(dateStr);
+        const day = d.getDay();
+        if (day === 5 || day === 6) return 'weekend';
+        return 'weekday';
+    }
+
+    function getDateTypeLabel(type) {
+        if (type === 'weekday') return '平日';
+        if (type === 'weekend') return '週末';
+        return '特殊日';
+    }
+
+    // ========== 房型下拉更新 ==========
+    function updateRoomTypes() {
+        const hotel = document.getElementById('fHotel').value;
+        const sel = document.getElementById('fRoomType');
+        sel.innerHTML = '<option value="">選擇房型</option>';
+        if (hotel && hotelData[hotel]) {
+            hotelData[hotel].rooms.forEach(r => {
+                sel.innerHTML += `<option value="${r.name}">${r.code} ${r.name}</option>`;
+            });
+        }
+    }
+
+    // ========== 自動計算 ==========
+    function triggerAutoCalc() {
+        const hotel = document.getElementById('fHotel').value;
+        const roomName = document.getElementById('fRoomType').value;
+        const checkIn = document.getElementById('fCheckIn').value;
+        const checkOut = document.getElementById('fCheckOut').value;
+
+        if (!hotel || !roomName || !checkIn || !checkOut) {
+            return;
+        }
+
+        const room = hotelData[hotel]?.rooms.find(r => r.name === roomName);
+        if (!room) { return; }
+
+        const start = new Date(checkIn);
+        const end = new Date(checkOut);
+        if (end <= start) { return; }
+
+        let total = 0;
+        let details = [];
+        let current = new Date(start);
+
+        while (current < end) {
+            const dateStr = current.toISOString().split('T')[0];
+            const type = getDateType(dateStr);
+            let price = 0;
+            if (type === 'weekday') price = room.weekday;
+            else if (type === 'weekend') price = room.weekend;
+            else price = room.premium;
+
+            const label = getDateTypeLabel(type);
+            details.push({ type: label, price: price, date: dateStr });
+            total += price;
+            current.setDate(current.getDate() + 1);
+        }
+
+        const merged = {};
+        details.forEach(d => {
+            if (!merged[d.type]) merged[d.type] = { count: 0, price: d.price };
+            merged[d.type].count++;
+        });
+
+        let detailStr = Object.entries(merged).map(([type, v]) => `${type}${v.price}×${v.count}`).join('+');
+        let washNeed = room.wash * details.length;
+
+        document.getElementById('fDetail').value = detailStr;
+        document.getElementById('fAmount').value = total;
+        document.getElementById('fNeedWash').value = washNeed;
+    }
+
+    // ========== 新增記錄 ==========
+    function addRecord() {
+        const lineHead = document.getElementById('fLineHead').value;
+        const name = document.getElementById('fName').value.trim();
+        const hotel = document.getElementById('fHotel').value;
+        const checkIn = document.getElementById('fCheckIn').value;
+        const checkOut = document.getElementById('fCheckOut').value;
+        const roomType = document.getElementById('fRoomType').value;
+        const detail = document.getElementById('fDetail').value.trim();
+        const amount = parseFloat(document.getElementById('fAmount').value) || 0;
+        const needWash = parseFloat(document.getElementById('fNeedWash').value) || 0;
+        const actualWash = parseFloat(document.getElementById('fActualWash').value) || 0;
+
+        if (!lineHead || !name || !hotel || !checkIn || !checkOut) {
+            alert('請填寫線頭、姓名、酒店、入住日、退房日');
+            return;
+        }
+
+        const records = loadRecords();
+        const _id = Date.now() + '_' + Math.random().toString(36).substr(2,6);
+        records.push({ _id, lineHead, name, hotel, checkIn, checkOut, roomType, detail, amount, needWash, actualWash });
+        saveRecords(records);
+
+        document.getElementById('fLineHead').value = lineHead;
+        document.getElementById('fName').value = '';
+        ['fCheckIn','fCheckOut','fDetail','fAmount','fNeedWash','fActualWash'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('fHotel').value = '';
+        document.getElementById('fRoomType').innerHTML = '<option value="">先選酒店</option>';
+
+        alert('✅ 已新增!');
+        renderAll();
+    }
+
+    // ========== 渲染記錄表格 ==========
+    function renderRecords() {
+        const records = loadRecords();
+        const tbody = document.getElementById('recordsBody');
+        const empty = document.getElementById('emptyRecords');
+        const summary = document.getElementById('summaryCard');
+
+        if (records.length === 0) {
+            tbody.innerHTML = '';
+            empty.style.display = 'block';
+            summary.style.display = 'none';
+            updateStats([]);
+            return;
+        }
+
+        empty.style.display = 'none';
+        summary.style.display = 'block';
+
+        const filtered = getFilteredRecords();
+        let html = '';
+        filtered.forEach((r) => {
+            const ci = r.checkIn ? r.checkIn.slice(5).replace('-','/') : '';
+            const co = r.checkOut ? r.checkOut.slice(5).replace('-','/') : '';
+            html += `<tr>
+                <td class="col-linehead">${r.lineHead || '-'}</td>
+                <td class="col-name">${r.name}</td>
+                <td>${ci}</td>
+                <td>${co}</td>
+                <td class="col-hotel">${r.hotel}</td>
+                <td>${r.roomType || '-'}</td>
+                <td class="col-detail">${r.detail || '-'}</td>
+                <td class="col-amount">${r.amount.toLocaleString()}</td>
+                <td class="col-need">${r.needWash}</td>
+                <td class="col-actual">${r.actualWash}</td>
+                <td>
+                    <button class="op-btn op-edit" onclick="openEditById('${r._id}')">✏️</button>
+                    <button class="op-btn op-del" onclick="delRecordById('${r._id}')">🗑️</button>
+                </td>
+            </tr>`;
+        });
+        tbody.innerHTML = html;
+
+        updateStats(filtered);
+    }
+
+    // ========== 統計計算 ==========
+    function updateStats(records) {
+        let totalAmount = 0, totalNeed = 0, totalActual = 0;
+        let totalNights = 0;
+        records.forEach(r => {
+            totalAmount += r.amount;
+            totalNeed += r.needWash;
+            totalActual += r.actualWash;
+            if (r.checkIn && r.checkOut) {
+                const diff = Math.round((new Date(r.checkOut) - new Date(r.checkIn)) / 86400000);
+                if (diff > 0) totalNights += diff;
+            }
+        });
+
+        const rate = totalNeed > 0 ? (totalActual / totalNeed * 100) : 0;
+        const dueAmount = rate >= 100 ? 0 : Math.round(totalAmount * (100 - rate) / 100);
+
+        document.getElementById('sumAmount').textContent = totalAmount.toLocaleString();
+        document.getElementById('sumNeed').textContent = totalNeed;
+        document.getElementById('sumActual').textContent = totalActual;
+        document.getElementById('sumNights').textContent = totalNights;
+        document.getElementById('sumRate').textContent = rate.toFixed(1) + '%';
+        document.getElementById('sumDue').textContent = dueAmount.toLocaleString();
+
+        document.getElementById('statTotalAmount').textContent = totalAmount.toLocaleString();
+        document.getElementById('statNeedWash').textContent = totalNeed;
+        document.getElementById('statActualWash').textContent = totalActual;
+        document.getElementById('statNights').textContent = totalNights;
+        document.getElementById('statRate').textContent = rate.toFixed(1) + '%';
+        document.getElementById('statDue').textContent = dueAmount.toLocaleString();
+
+        const rateEl = document.getElementById('sumRate');
+        rateEl.style.color = rate >= 100 ? '#2ecc71' : (rate >= 80 ? '#f1c40f' : '#ff4d4d');
+    }
+
+    function findRecordIndex(_id) {
+        const records = loadRecords();
+        return records.findIndex(r => r._id === _id);
+    }
+
+    // ========== 刪除記錄 ==========
+    function delRecordById(_id) {
+        if (!confirm('確定刪除這筆記錄?')) return;
+        const records = loadRecords();
+        const idx = records.findIndex(r => r._id === _id);
+        if (idx === -1) return alert('找不到記錄');
+        records.splice(idx, 1);
+        saveRecords(records);
+        renderAll();
+    }
+
+    // ========== 編輯記錄 ==========
+    let currentEditId = '';
+    function openEditById(_id) {
+        const records = loadRecords();
+        const r = records.find(r => r._id === _id);
+        if (!r) return alert('找不到記錄');
+        currentEditId = _id;
+
+        document.getElementById('eLineHead').value = r.lineHead || '';
+        document.getElementById('eName').value = r.name;
+        document.getElementById('eHotel').value = r.hotel;
+        document.getElementById('eCheckIn').value = r.checkIn;
+        document.getElementById('eCheckOut').value = r.checkOut;
+        document.getElementById('eRoomType').value = r.roomType || '';
+        document.getElementById('eDetail').value = r.detail || '';
+        document.getElementById('eAmount').value = r.amount;
+        document.getElementById('eNeedWash').value = r.needWash;
+        document.getElementById('eActualWash').value = r.actualWash;
+
+        document.getElementById('editModal').classList.add('show');
+    }
+
+    function closeEdit() {
+        document.getElementById('editModal').classList.remove('show');
+        currentEditId = '';
+    }
+
+    function saveEdit() {
+        const records = loadRecords();
+        const idx = records.findIndex(r => r._id === currentEditId);
+        if (idx === -1) return alert('找不到記錄');
+
+        records[idx] = {
+            _id: currentEditId,
+            lineHead: document.getElementById('eLineHead').value.trim(),
+            name: document.getElementById('eName').value.trim(),
+            hotel: document.getElementById('eHotel').value,
+            checkIn: document.getElementById('eCheckIn').value,
+            checkOut: document.getElementById('eCheckOut').value,
+            roomType: document.getElementById('eRoomType').value.trim(),
+            detail: document.getElementById('eDetail').value.trim(),
+            amount: parseFloat(document.getElementById('eAmount').value) || 0,
+            needWash: parseFloat(document.getElementById('eNeedWash').value) || 0,
+            actualWash: parseFloat(document.getElementById('eActualWash').value) || 0
+        };
+
+        saveRecords(records);
+        closeEdit();
+        renderAll();
+        alert('✅ 已更新!');
+    }
+
+    // ========== 總覽 ==========
+    function renderOverview() {
+        const records = loadRecords();
+        const filtered = currentFilter ? records.filter(r => (r.lineHead || '') === currentFilter) : records;
+        const overview = {};
+
+        filtered.forEach(r => {
+            const key = (r.lineHead || '') + '_' + r.name;
+            if (!overview[key]) {
+                overview[key] = { lineHead: r.lineHead || '', name: r.name, count: 0, amount: 0, needWash: 0, actualWash: 0 };
+            }
+            overview[key].count++;
+            overview[key].amount += r.amount;
+            overview[key].needWash += r.needWash;
+            overview[key].actualWash += r.actualWash;
+        });
+
+        const tbody = document.getElementById('overviewBody');
+        const empty = document.getElementById('emptyOverview');
+
+        if (Object.keys(overview).length === 0) {
+            tbody.innerHTML = '';
+            empty.style.display = 'block';
+            return;
+        }
+
+        empty.style.display = 'none';
+        let html = '';
+        Object.values(overview).forEach(o => {
+            const rate = o.needWash > 0 ? (o.actualWash / o.needWash * 100) : 0;
+            html += `<tr>
+                <td class="col-linehead">${o.lineHead}</td>
+                <td class="col-name">${o.name}</td>
+                <td>${o.count}</td>
+                <td class="col-amount">${o.amount.toLocaleString()}</td>
+                <td class="col-need">${o.needWash}</td>
+                <td class="col-actual">${o.actualWash}</td>
+                <td style="color:${rate>=100?'#2ecc71':(rate>=80?'#f1c40f':'#ff4d4d')};font-weight:bold;">${rate.toFixed(1)}%</td>
+            </tr>`;
+        });
+        tbody.innerHTML = html;
+    }
+
+    // ========== 送房條件 ==========
+    function renderConditions() {
+        let melcoHtml = '';
+        let sandsHtml = '';
+        let galaxyHtml = '';
+
+        Object.entries(hotelData).forEach(([hotel, data]) => {
+            data.rooms.forEach(r => {
+                const row = `<tr>
+                    <td class="col-hotel">${hotel}</td>
+                    <td>${r.code}</td>
+                    <td>${r.name}</td>
+                    <td>${r.weekday}</td>
+                    <td>${r.weekend}</td>
+                    <td>${r.premium || '-'}</td>
+                    <td class="col-need">${r.wash}萬</td>
+                </tr>`;
+                if (data.group === 'melco') melcoHtml += row;
+                else if (data.group === 'sands') sandsHtml += row;
+                else if (data.group === 'galaxy') galaxyHtml += row;
+            });
+        });
+
+        document.getElementById('condMelco').innerHTML = melcoHtml;
+        document.getElementById('condSands').innerHTML = sandsHtml;
+        document.getElementById('condGalaxy').innerHTML = galaxyHtml;
+    }
+
+    // ========== 匯出Excel ==========
+    function exportExcel() {
+        const records = loadRecords();
+        if (records.length === 0) return alert('尚無記錄可匯出');
+
+        let csv = '\uFEFF線頭,姓名,入住日,退房日,酒店,房型,明細,金額,需洗碼量,開工洗碼量\n';
+        records.forEach(r => {
+            csv += `${r.lineHead || ''},${r.name},${r.checkIn},${r.checkOut},${r.hotel},"${r.roomType || ''}","${r.detail || ''}",${r.amount},${r.needWash},${r.actualWash}\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `澳門房費統計_${currentYear}年${currentMonth}月.csv`;
+        link.click();
+    }
+
+    // ========== 清空月份 ==========
+    function clearMonth() {
+        if (!confirm(`確定清空 ${currentYear}年${currentMonth}月 所有記錄?`)) return;
+        const all = loadAllRecords();
+        const remaining = all.filter(r => {
+            if (!r.checkIn) return true;
+            const d = new Date(r.checkIn);
+            return !(d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth);
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(remaining));
+        if (firebaseReady && db) {
+            db.ref('records/all').set(remaining).catch(e => console.warn('同步失敗:', e.message));
+        }
+        renderAll();
+        alert('✅ 已清空!');
+    }
+
+    // ========== 初始化 ==========
+    function renderAll() {
+        updateMonthLabel();
+        renderRecords();
+        if (document.getElementById('page-overview').classList.contains('active')) renderOverview();
+    }
+
+    // 更新同步狀態顯示
+    const syncEl = document.getElementById('syncStatus');
+    if (syncEl) {
+        syncEl.textContent = firebaseReady ? '● 雲端同步中' : '● 離線模式';
+        syncEl.style.color = firebaseReady ? '#2ecc71' : '#ff4d4d';
+    }
+
+    loadLineHeads();
+    listenFirebaseRecords();
+    renderAll();
+    
+
+
+</script>
+</body>
+</html>
