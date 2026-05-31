@@ -1487,6 +1487,10 @@
         document.getElementById('fRoomType').innerHTML = '<option value="">先選酒店</option>';
 
         alert('✅ 已新增!');
+        switchTab('records');
+        document.querySelectorAll('.tab-btn').forEach(t => {
+            t.classList.toggle('active', t.textContent.includes('房費記錄'));
+        });
         renderAll();
     }
 
