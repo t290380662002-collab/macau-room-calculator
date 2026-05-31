@@ -968,46 +968,183 @@
     let currentYear = new Date().getFullYear();
     let currentMonth = new Date().getMonth() + 1;
 
+    
+    
     const hotelData = {
+        // ========== Melco Group (新濠系) ==========
         "摩珀斯": {
             rooms: [
-                { code: "PK", name: "摩珀斯套房(大床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
-                { code: "PK2", name: "摩珀斯套房(雙床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
-                { code: "PS", name: "摩珀斯豪華套房", weekday: 2700, weekend: 3000, premium: 4200, wash: 180 },
-                { code: "PS2", name: "摩珀斯2房套房", weekday: 4200, weekend: 4500, premium: 6000, wash: 300 },
+                { code: "MPK", name: "摩珀斯套房(大床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "MPPK", name: "摩珀斯套房(雙床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "MPT", name: "摩珀斯豪華套房", weekday: 2700, weekend: 3000, premium: 4200, wash: 180 },
+                { code: "MCPT", name: "摩珀斯2房套房", weekday: 4200, weekend: 4500, premium: 6000, wash: 300 },
+                { code: "MPS", name: "摩珀斯3房套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 1000 },
+                { code: "MES", name: "摩珀斯總統套房", weekday: 10000, weekend: 11000, premium: 13000, wash: 3000 }
+            ],
+            group: "melco"
+        },
+        "頤居": {
+            rooms: [
+                { code: "NPK", name: "頤居客房(大床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "NPKV", name: "頤居客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "NPQ", name: "頤居豪華客房", weekday: 1800, weekend: 2000, premium: 3000, wash: 180 },
+                { code: "NPQV", name: "頤居豪華客房(雙床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 180 },
+                { code: "NDS", name: "頤居套房", weekday: 3000, weekend: 3200, premium: 4500, wash: 300 },
+                { code: "NCDS", name: "頤居豪華套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 1000 },
+                { code: "NPS", name: "頤居2房套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 3000 },
+                { code: "NPSV", name: "頤居3房套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 3000 }
+            ],
+            group: "melco"
+        },
+        "明星匯": {
+            rooms: [
+                { code: "CRK", name: "明星匯客房(大床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "CRT", name: "明星匯客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "CDK", name: "明星匯豪華客房", weekday: 1800, weekend: 2000, premium: 3000, wash: 180 },
+                { code: "CDT", name: "明星匯豪華客房(雙床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 180 },
+                { code: "CSS", name: "明星匯套房", weekday: 3000, weekend: 3200, premium: 4500, wash: 300 },
+                { code: "SDK", name: "明星匯豪華套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 1000 }
+            ],
+            group: "melco"
+        },
+        "巨星匯": {
+            rooms: [
+                { code: "SDT", name: "巨星匯客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "STS", name: "巨星匯套房", weekday: 3000, weekend: 3200, premium: 4500, wash: 300 },
+                { code: "SPS", name: "巨星匯豪華套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 1000 },
+                { code: "SGS", name: "巨星匯總統套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 3000 }
             ],
             group: "melco"
         },
         "映星匯": {
             rooms: [
-                { code: "EDT", name: "映星匯套房(雙床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 60 },
-                { code: "ESU", name: "映星匯豪華套房", weekday: 2700, weekend: 3000, premium: 4200, wash: 180 },
+                { code: "EDK", name: "映星匯客房(大床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "EDT", name: "映星匯客房(雙床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "EG1", name: "映星匯套房", weekday: 2700, weekend: 3000, premium: 4200, wash: 180 },
+                { code: "ES1", name: "映星匯豪華套房", weekday: 4200, weekend: 4500, premium: 6000, wash: 300 },
+                { code: "EO1", name: "映星匯行政套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 1000 },
+                { code: "EG2", name: "映星匯2房套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 3000 },
+                { code: "ES2", name: "映星匯3房套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 3000 },
+                { code: "EP3", name: "映星匯頂層套房", weekday: 15000, weekend: 16000, premium: 18000, wash: 3000 }
             ],
             group: "melco"
         },
-        "新濠影匯": {
+        "君悅": {
             rooms: [
-                { code: "SRK", name: "明星套房(大床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 50 },
-                { code: "SRK2", name: "明星套房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 50 },
-                { code: "SSR", name: "明星豪華套房", weekday: 2200, weekend: 2500, premium: 3500, wash: 120 },
+                { code: "KING", name: "君悅客房(大床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "TWIN", name: "君悅客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "DLXK", name: "君悅豪華客房(大床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 180 },
+                { code: "DLXT", name: "君悅豪華客房(雙床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 180 },
+                { code: "CLDK", name: "君悅套房(大床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 300 },
+                { code: "CLDT", name: "君悅套房(雙床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 300 },
+                { code: "GRSK", name: "君悅豪華套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 1000 },
+                { code: "GRXS", name: "君悅行政套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 3000 },
+                { code: "PREM", name: "君悅總理套房", weekday: 10000, weekend: 11000, premium: 13000, wash: 3000 },
+                { code: "DIPL", name: "君悅外交官套房", weekday: 15000, weekend: 16000, premium: 18000, wash: 3000 },
+                { code: "PRES", name: "君悅總統套房", weekday: 20000, weekend: 22000, premium: 25000, wash: 3000 },
+                { code: "CHHN", name: "君悅主席套房", weekday: 30000, weekend: 32000, premium: 35000, wash: 3000 }
             ],
             group: "melco"
         },
-        "康萊德": {
+        // ========== Sands Group (金沙系) ==========
+        "名匯": {
             rooms: [
-                { code: "C1K", name: "康萊德客房(大床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 50 },
-                { code: "C1Q", name: "康萊德客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 50 },
+                { code: "R2", name: "名匯客房(大床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 60 },
+                { code: "RK", name: "名匯客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 60 },
+                { code: "V2", name: "名匯豪華客房(大床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 150 },
+                { code: "VK", name: "名匯豪華客房(雙床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 150 },
+                { code: "LS2", name: "名匯套房(大床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 150 },
+                { code: "LSK", name: "名匯套房(雙床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 150 },
+                { code: "GS2", name: "名匯行政套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 300 },
+                { code: "GSK", name: "名匯行政套房(雙床)", weekday: 4500, weekend: 5000, premium: 6500, wash: 300 },
+                { code: "CS2", name: "名匯主席套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 300 },
+                { code: "GC2", name: "名匯總理套房", weekday: 10000, weekend: 11000, premium: 13000, wash: 300 },
+                { code: "TS", name: "名匯總統套房", weekday: 15000, weekend: 16000, premium: 18000, wash: 300 }
             ],
             group: "sands"
         },
         "倫敦人": {
             rooms: [
-                { code: "L1K", name: "倫敦人客房(大床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 50 },
-                { code: "L1Q", name: "倫敦人客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 50 },
+                { code: "KC", name: "倫敦人客房(大床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 60 },
+                { code: "TC", name: "倫敦人客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 60 },
+                { code: "KS", name: "倫敦人套房(大床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 150 },
+                { code: "TS", name: "倫敦人套房(雙床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 150 },
+                { code: "DBK1", name: "倫敦人雙床套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 150 },
+                { code: "DBKD2", name: "倫敦人2房套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 300 },
+                { code: "DBKQD3", name: "倫敦人3房套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 300 }
             ],
             group: "sands"
+        },
+        "御園": {
+            rooms: [
+                { code: "CM1", name: "御園客房(大床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 150 },
+                { code: "CG1", name: "御園客房(雙床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 150 },
+                { code: "CGD1", name: "御園豪華客房(大床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 150 },
+                { code: "CMD1", name: "御園豪華客房(雙床)", weekday: 3000, weekend: 3200, premium: 4500, wash: 150 },
+                { code: "CK2", name: "御園套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 300 },
+                { code: "CKD2", name: "御園2房套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 300 },
+                { code: "CV3", name: "御園3房套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 300 },
+                { code: "CVS4", name: "御園4房套房", weekday: 10000, weekend: 11000, premium: 13000, wash: 300 }
+            ],
+            group: "sands"
+        },
+        // ========== Galaxy Group (銀河系) ==========
+        "銀河": {
+            rooms: [
+                { code: "GM01", name: "銀河客房(大床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "GM01T", name: "銀河客房(雙床)", weekday: 1200, weekend: 1500, premium: 2200, wash: 80 },
+                { code: "GM04", name: "銀河豪華客房", weekday: 1800, weekend: 2000, premium: 3000, wash: 200 },
+                { code: "GM06", name: "銀河套房", weekday: 3000, weekend: 3200, premium: 4500, wash: 400 },
+                { code: "GM07", name: "銀河豪華套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 400 },
+                { code: "GM08", name: "銀河總統套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 400 }
+            ],
+            group: "galaxy"
+        },
+        "大倉": {
+            rooms: [
+                { code: "OK01", name: "大倉客房(大床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "OK02", name: "大倉客房(雙床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "OK03", name: "大倉豪華客房", weekday: 2700, weekend: 3000, premium: 4200, wash: 200 },
+                { code: "OK05", name: "大倉套房", weekday: 4200, weekend: 4500, premium: 6000, wash: 400 },
+                { code: "OK06", name: "大倉豪華套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 400 },
+                { code: "OK07", name: "大倉總統套房", weekday: 10000, weekend: 11000, premium: 13000, wash: 400 }
+            ],
+            group: "galaxy"
+        },
+        "悅榕莊": {
+            rooms: [
+                { code: "BT01", name: "悅榕莊客房(大床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 80 },
+                { code: "BT02", name: "悅榕莊客房(雙床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 80 },
+                { code: "BT03", name: "悅榕莊套房", weekday: 3000, weekend: 3200, premium: 4500, wash: 200 },
+                { code: "BT05", name: "悅榕莊別墅", weekday: 8000, weekend: 8500, premium: 10000, wash: 400 },
+                { code: "BT06", name: "悅榕莊海景別墅", weekday: 10000, weekend: 11000, premium: 13000, wash: 400 }
+            ],
+            group: "galaxy"
+        },
+        "萬豪": {
+            rooms: [
+                { code: "JW01", name: "萬豪客房(大床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "JW02", name: "萬豪客房(雙床)", weekday: 1500, weekend: 1800, premium: 2700, wash: 80 },
+                { code: "JW03", name: "萬豪豪華客房", weekday: 2700, weekend: 3000, premium: 4200, wash: 200 },
+                { code: "JW05", name: "萬豪套房", weekday: 4200, weekend: 4500, premium: 6000, wash: 200 },
+                { code: "JW06", name: "萬豪行政套房", weekday: 6000, weekend: 6500, premium: 8000, wash: 200 },
+                { code: "JW08", name: "萬豪總統套房", weekday: 15000, weekend: 16000, premium: 18000, wash: 200 }
+            ],
+            group: "galaxy"
+        },
+        "麗絲卡爾頓": {
+            rooms: [
+                { code: "RC01", name: "麗絲卡爾頓客房(大床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 200 },
+                { code: "RC03", name: "麗絲卡爾頓客房(雙床)", weekday: 1800, weekend: 2000, premium: 3000, wash: 200 },
+                { code: "RC05", name: "麗絲卡爾頓套房", weekday: 4500, weekend: 5000, premium: 6500, wash: 200 },
+                { code: "RC06", name: "麗絲卡爾頓豪華套房", weekday: 8000, weekend: 8500, premium: 10000, wash: 200 },
+                { code: "RC07", name: "麗絲卡爾頓總統套房", weekday: 15000, weekend: 16000, premium: 18000, wash: 200 }
+            ],
+            group: "galaxy"
         }
     };
+
+
 
     // ========== 儲存(統一存所有記錄,按入住日期篩選月份) ==========
     const STORAGE_KEY = 'macau_rooms_all';
