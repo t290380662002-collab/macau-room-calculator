@@ -761,6 +761,18 @@
                 </div>
             </div>
         </div>
+            <div class="card">
+                <div class="card-title">🎁 銀河系送房條件</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>酒店</th><th>Code</th><th>房型</th><th>平日</th><th>週五/六</th><th>特殊日</th><th>洗碼量</th></tr>
+                        </thead>
+                        <tbody id="condGalaxy"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- 線頭管理 Modal -->
@@ -1672,6 +1684,7 @@
     function renderConditions() {
         let melcoHtml = '';
         let sandsHtml = '';
+        let galaxyHtml = '';
 
         Object.entries(hotelData).forEach(([hotel, data]) => {
             data.rooms.forEach(r => {
@@ -1685,12 +1698,14 @@
                     <td class="col-need">${r.wash}萬</td>
                 </tr>`;
                 if (data.group === 'melco') melcoHtml += row;
-                else sandsHtml += row;
+                else if (data.group === 'sands') sandsHtml += row;
+                else if (data.group === 'galaxy') galaxyHtml += row;
             });
         });
 
         document.getElementById('condMelco').innerHTML = melcoHtml;
         document.getElementById('condSands').innerHTML = sandsHtml;
+        document.getElementById('condGalaxy').innerHTML = galaxyHtml;
     }
 
     // ========== 匯出Excel ==========
