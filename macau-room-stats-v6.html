@@ -103,130 +103,6 @@
         .month-nav .month-picker:hover {
             background: rgba(255,215,0,0.2);
         }
-        .month-picker-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1a1a2e;
-            border: 1px solid #333;
-            border-radius: 10px;
-            padding: 12px;
-            z-index: 100;
-            min-width: 220px;
-        }
-        .mp-year-nav {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 10px;
-            color: #fff;
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-        .mp-year-nav button {
-            background: rgba(255,215,0,0.2);
-            border: none;
-            color: #fff;
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9em;
-        }
-        .mp-months {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-        }
-        .mp-months span {
-            text-align: center;
-            padding: 6px 4px;
-            border-radius: 6px;
-            color: #ccc;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.15s;
-        }
-        .mp-months span:hover {
-            background: rgba(255,215,0,0.2);
-            color: #fff;
-        }
-        .mp-months span.mp-active {
-            background: #d4af37;
-            color: #000;
-            font-weight: bold;
-        }
-        .mp-quick-btns {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 10px;
-        }
-        .mp-quick {
-            flex: 1;
-            padding: 6px 4px;
-            border: 1px solid #555;
-            border-radius: 6px;
-            background: transparent;
-            color: #ccc;
-            cursor: pointer;
-            font-size: 0.85em;
-            transition: all 0.15s;
-        }
-        .mp-quick:hover {
-            background: rgba(255,215,0,0.2);
-            color: #fff;
-            border-color: #d4af37;
-        }
-        .mp-quick.mp-q-active {
-            background: rgba(212,175,55,0.25);
-            color: #d4af37;
-            border-color: #d4af37;
-            font-weight: bold;
-        }
-        .mp-date-range {
-            margin-top: 10px;
-            border-top: 1px solid #333;
-            padding-top: 10px;
-        }
-        .mp-date-title {
-            color: #999;
-            font-size: 0.8em;
-            margin-bottom: 6px;
-        }
-        .mp-date-inputs {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .mp-date-inputs input {
-            flex: 1;
-            padding: 4px 6px;
-            border: 1px solid #555;
-            border-radius: 6px;
-            background: #1a1a2e;
-            color: #fff;
-            font-size: 0.85em;
-        }
-        .mp-date-inputs span {
-            color: #888;
-        }
-        .mp-date-ok {
-            width: 100%;
-            margin-top: 6px;
-            padding: 6px;
-            border: 1px solid #555;
-            border-radius: 6px;
-            background: rgba(212,175,55,0.15);
-            color: #d4af37;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.15s;
-        }
-        .mp-date-ok:hover {
-            background: rgba(212,175,55,0.3);
-        }
 
         /* 統計卡片區 */
         .stats-row {
@@ -517,30 +393,7 @@
         <!-- 月份導航 -->
         <div class="month-nav">
             <button onclick="changeMonth(-1)">◀</button>
-            <button class="month-label month-picker" id="monthLabel" onclick="toggleMonthPicker(event)">2025年6月</button>
-            <div id="monthPicker" class="month-picker-dropdown" style="display:none">
-                <div class="mp-quick-btns">
-                    <button class="mp-quick" onclick="mpQuick('thisWeek')">📆 本週</button> 
-                    <button class="mp-quick" onclick="mpQuick('lastWeek')">📋 上週</button>
-                </div>
-                <div class="mp-year-nav">
-                    <button onclick="mpYear(-1)">◀</button>
-                    <span id="mpYearLabel">2026</span>
-                    <button onclick="mpYear(1)">▶</button>
-                </div>
-                <div class="mp-months">
-                    <span onclick="mpSelect(1)">1月</span><span onclick="mpSelect(2)">2月</span><span onclick="mpSelect(3)">3月</span><span onclick="mpSelect(4)">4月</span><span onclick="mpSelect(5)">5月</span><span onclick="mpSelect(6)">6月</span><span onclick="mpSelect(7)">7月</span><span onclick="mpSelect(8)">8月</span><span onclick="mpSelect(9)">9月</span><span onclick="mpSelect(10)">10月</span><span onclick="mpSelect(11)">11月</span><span onclick="mpSelect(12)">12月</span>
-                </div>
-                <div class="mp-date-range">
-                    <div class="mp-date-title">自訂日期範圍</div>
-                    <div class="mp-date-inputs">
-                        <input type="date" id="mpDateFrom" />
-                        <span>~</span>
-                        <input type="date" id="mpDateTo" />
-                    </div>
-                    <button class="mp-date-ok" onclick="mpDateRange()">確定</button>
-                </div>
-            </div>
+            <button class="month-label" id="monthLabel" onclick="openMonthModal()">2025年6月</button>
             <button onclick="changeMonth(1)">▶</button>
         </div>
 
@@ -776,6 +629,47 @@
                     </table>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- 月份選擇 Modal -->
+    <div class="modal-overlay" id="monthModal">
+        <div class="modal-box">
+            <h3>📆 選擇月份</h3>
+            <div class="mp-quick-btns" style="display:flex;gap:6px;margin-bottom:12px;">
+                <button class="mp-quick" onclick="mpQuick('thisMonth')" style="flex:1;padding:8px;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);color:#ffd700;border-radius:6px;cursor:pointer;">📆 本月</button>
+                <button class="mp-quick" onclick="mpQuick('thisWeek')" style="flex:1;padding:8px;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);color:#ffd700;border-radius:6px;cursor:pointer;">📆 本週</button>
+                <button class="mp-quick" onclick="mpQuick('lastWeek')" style="flex:1;padding:8px;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);color:#ffd700;border-radius:6px;cursor:pointer;">📋 上週</button>
+            </div>
+            <div class="mp-year-nav" style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:10px;">
+                <button onclick="mpYear(-1)" style="padding:6px 14px;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);color:#ffd700;border-radius:6px;cursor:pointer;">◀</button>
+                <span id="mpYearLabel" style="color:#ffd700;font-size:1.1em;font-weight:bold;min-width:60px;text-align:center;">2026</span>
+                <button onclick="mpYear(1)" style="padding:6px 14px;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);color:#ffd700;border-radius:6px;cursor:pointer;">▶</button>
+            </div>
+            <div class="mp-months" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;">
+                <span onclick="mpSelect(1)" style="text-align:center;padding:10px 4px;border-radius:6px;color:#ccc;cursor:pointer;font-size:0.95em;transition:all 0.15s;">1月</span>
+                <span onclick="mpSelect(2)" style="text-align:center;padding:10px 4px;border-radius:6px;color:#ccc;cursor:pointer;font-size:0.95em;transition:all 0.15s;">2月</span>
+                <span onclick="mpSelect(3)" style="text-align:center;padding:10px 4px;border-radius:6px;color:#ccc;cursor:pointer;font-size:0.95em;transition:all 0.15s;">3月</span>
+                <span onclick="mpSelect(4)" style="text-align:center;padding:10px 4px;border-radius:6px;color:#ccc;cursor:pointer;font-size:0.95em;transition:all 0.15s;">4月</span>
+                <span onclick="mpSelect(5)" style="text-align:center;padding:10px 4px;border-radius:6px;color:#ccc;cursor:pointer;font-size:0.95em;transition:all 0.15s;">5月</span>
+                <span onclick="mpSelect(6)" style="text-align:center;padding:10px 4px;border-radius:6px;color:#ccc;cursor:pointer;font-size:0.95em;transition:all 0.15s;">6月</span>
+                <span onclick="mpSelect(7)" style="text-align:center;padding:10px 4px;border-radius:6px;color:#ccc;cursor:pointer;font-size:0.95em;transition:all 0.15s;">7月</span>
+                <span onclick="mpSelect(8)" style="text-align:center;padding:10px 4px;border-radius:6px;color:#ccc;cursor:pointer;font-size:0.95em;transition:all 0.15s;">8月</span>
+                <span onclick="mpSelect(9)" style="text-align:center;padding:10px 4px;border-radius:6px;color:#ccc;cursor:pointer;font-size:0.95em;transition:all 0.15s;">9月</span>
+                <span onclick="mpSelect(10)" style="text-align:center;padding:10px 4px;border-radius:6px;color:#ccc;cursor:pointer;font-size:0.95em;transition:all 0.15s;">10月</span>
+                <span onclick="mpSelect(11)" style="text-align:center;padding:10px 4px;border-radius:6px;color:#ccc;cursor:pointer;font-size:0.95em;transition:all 0.15s;">11月</span>
+                <span onclick="mpSelect(12)" style="text-align:center;padding:10px 4px;border-radius:6px;color:#ccc;cursor:pointer;font-size:0.95em;transition:all 0.15s;">12月</span>
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;">
+                <div style="color:#888;font-size:0.85em;margin-bottom:8px;">自訂日期範圍</div>
+                <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+                    <input type="date" id="mpDateFrom" style="flex:1;padding:7px 8px;border:1px solid rgba(255,215,0,0.2);border-radius:6px;background:rgba(255,255,255,0.05);color:#fff;font-size:0.85em;" />
+                    <span style="color:#888;">~</span>
+                    <input type="date" id="mpDateTo" style="flex:1;padding:7px 8px;border:1px solid rgba(255,215,0,0.2);border-radius:6px;background:rgba(255,255,255,0.05);color:#fff;font-size:0.85em;" />
+                </div>
+                <button onclick="mpDateRange()" style="width:100%;padding:8px;background:rgba(46,204,113,0.2);border:1px solid rgba(46,204,113,0.3);color:#2ecc71;border-radius:6px;cursor:pointer;">確定</button>
+            </div>
+            <button onclick="closeMonthModal()" style="margin-top:10px;width:100%;padding:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#aaa;border-radius:6px;cursor:pointer;">關閉</button>
         </div>
     </div>
 
@@ -1368,7 +1262,7 @@
     function mpQuick(mode) {
         if (mode === 'thisMonth') dateMode = 'month';
         else dateMode = mode;
-        closeMonthPicker();
+        closeMonthModal();
         currentYear = new Date().getFullYear();
         currentMonth = new Date().getMonth() + 1;
         renderAll();
@@ -1381,7 +1275,7 @@
         dateMode = 'custom';
         customDateFrom = from;
         customDateTo = to;
-        closeMonthPicker();
+        closeMonthModal();
         renderAll();
     }
 
@@ -1389,7 +1283,7 @@
         dateMode = 'month';
         currentYear = mpSelectedYear;
         currentMonth = m;
-        closeMonthPicker();
+        closeMonthModal();
         renderAll();
     }
 
@@ -1422,69 +1316,39 @@
         }
     }
 
-    // ========== 原有月份選擇器 ==========
+    // ========== 月份選擇 Modal ==========
     let mpSelectedYear = currentYear;
-    let monthPickerOpen = false;
 
-    function toggleMonthPicker(e) {
-        e.stopPropagation();
-        e.preventDefault();
-        const el = document.getElementById('monthPicker');
-        if (!el) return;
-        if (monthPickerOpen) {
-            closeMonthPicker();
-        } else {
-            mpSelectedYear = currentYear;
-            renderMonthPicker();
-            el.style.display = 'block';
-            monthPickerOpen = true;
-        }
+    function openMonthModal() {
+        mpSelectedYear = currentYear;
+        renderMonthModal();
+        document.getElementById('monthModal').classList.add('show');
     }
 
-    function closeMonthPicker() {
-        const el = document.getElementById('monthPicker');
-        if (el) el.style.display = 'none';
-        monthPickerOpen = false;
+    function closeMonthModal() {
+        document.getElementById('monthModal').classList.remove('show');
     }
 
     function mpYear(delta) {
         mpSelectedYear += delta;
-        renderMonthPicker();
+        renderMonthModal();
     }
 
-    function renderMonthPicker() {
+    function renderMonthModal() {
         document.getElementById('mpYearLabel').textContent = mpSelectedYear;
-        document.querySelectorAll('#monthPicker .mp-months span').forEach((el, i) => {
+        document.querySelectorAll('#monthModal .mp-months span').forEach((el, i) => {
             const m = i + 1;
             if (dateMode === 'month' && mpSelectedYear === currentYear && m === currentMonth) {
-                el.classList.add('mp-active');
+                el.style.background = '#d4af37';
+                el.style.color = '#000';
+                el.style.fontWeight = 'bold';
             } else {
-                el.classList.remove('mp-active');
+                el.style.background = 'rgba(255,255,255,0.05)';
+                el.style.color = '#ccc';
+                el.style.fontWeight = 'normal';
             }
         });
-        // 更新快速按鈕高亮
-        document.querySelectorAll('.mp-quick').forEach(b => b.classList.remove('mp-q-active'));
-        if (dateMode === 'month') {
-            const now = new Date();
-            if (currentYear === now.getFullYear() && currentMonth === now.getMonth() + 1) {
-                document.querySelector('.mp-quick[onclick*="thisMonth"]').classList.add('mp-q-active');
-            }
-        } else if (dateMode === 'thisWeek') {
-            document.querySelector('.mp-quick[onclick*="thisWeek"]').classList.add('mp-q-active');
-        } else if (dateMode === 'lastWeek') {
-            document.querySelector('.mp-quick[onclick*="lastWeek"]').classList.add('mp-q-active');
-        }
     }
-
-    // 點擊外部關閉
-    document.addEventListener('click', e => {
-        if (!monthPickerOpen) return;
-        const picker = document.getElementById('monthPicker');
-        const label = document.getElementById('monthLabel');
-        if (picker && !picker.contains(e.target) && !label.contains(e.target)) {
-            closeMonthPicker();
-        }
-    });
 
     // ========== Tab 切換 ==========
     function switchTab(name) {
