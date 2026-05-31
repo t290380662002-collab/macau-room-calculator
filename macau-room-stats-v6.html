@@ -89,6 +89,10 @@
             color: #fff;
             font-size: 1.1em;
             font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
         .month-nav .month-picker {
             cursor: pointer;
@@ -513,7 +517,7 @@
         <!-- 月份導航 -->
         <div class="month-nav">
             <button onclick="changeMonth(-1)">◀</button>
-            <span class="month-label month-picker" id="monthLabel" onclick="openMonthPicker()">2025年6月</span>
+            <button class="month-label month-picker" id="monthLabel" onclick="openMonthPicker()">2025年6月</button>
             <div id="monthPicker" class="month-picker-dropdown" style="display:none">
                 <div class="mp-quick-btns">
                     <button class="mp-quick" onclick="mpQuick('thisWeek')">📆 本週</button> 
@@ -1168,10 +1172,13 @@
     let mpSelectedYear = currentYear;
 
     function openMonthPicker() {
+        console.log('openMonthPicker called');
         const el = document.getElementById('monthPicker');
+        if (!el) { console.error('monthPicker element not found'); return; }
         mpSelectedYear = currentYear;
         renderMonthPicker();
         el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        console.log('monthPicker display:', el.style.display);
     }
 
     function mpYear(delta) {
