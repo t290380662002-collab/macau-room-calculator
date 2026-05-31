@@ -1264,7 +1264,7 @@
     function mpQuick(mode) {
         if (mode === 'thisMonth') dateMode = 'month';
         else dateMode = mode;
-        document.getElementById('monthPicker').style.display = 'none';
+        closeMonthPicker();
         currentYear = new Date().getFullYear();
         currentMonth = new Date().getMonth() + 1;
         renderAll();
@@ -1277,7 +1277,7 @@
         dateMode = 'custom';
         customDateFrom = from;
         customDateTo = to;
-        document.getElementById('monthPicker').style.display = 'none';
+        closeMonthPicker();
         renderAll();
     }
 
@@ -1285,7 +1285,7 @@
         dateMode = 'month';
         currentYear = mpSelectedYear;
         currentMonth = m;
-        document.getElementById('monthPicker').style.display = 'none';
+        closeMonthPicker();
         renderAll();
     }
 
@@ -1320,15 +1320,25 @@
 
     // ========== 原有月份選擇器 ==========
     let mpSelectedYear = currentYear;
+    let monthPickerOpen = false;
 
     function openMonthPicker() {
-        console.log('openMonthPicker called');
         const el = document.getElementById('monthPicker');
-        if (!el) { console.error('monthPicker element not found'); return; }
-        mpSelectedYear = currentYear;
-        renderMonthPicker();
-        el.style.display = el.style.display === 'none' ? 'block' : 'none';
-        console.log('monthPicker display:', el.style.display);
+        if (!el) return;
+        if (monthPickerOpen) {
+            closeMonthPicker();
+        } else {
+            mpSelectedYear = currentYear;
+            renderMonthPicker();
+            el.style.display = 'block';
+            monthPickerOpen = true;
+        }
+    }
+
+    function closeMonthPicker() {
+        const el = document.getElementById('monthPicker');
+        if (el) el.style.display = 'none';
+        monthPickerOpen = false;
     }
 
     function mpYear(delta) {
@@ -1364,8 +1374,8 @@
     document.addEventListener('click', e => {
         const picker = document.getElementById('monthPicker');
         const label = document.getElementById('monthLabel');
-        if (picker && !picker.contains(e.target) && e.target !== label) {
-            picker.style.display = 'none';
+        if (monthPickerOpen && picker && !picker.contains(e.target) && e.target !== label) {
+            closeMonthPicker();
         }
     });
 
