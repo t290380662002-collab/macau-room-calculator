@@ -1493,7 +1493,7 @@
         empty.style.display = 'none';
         summary.style.display = 'block';
 
-        const filtered = getFilteredRecords();
+        const filtered = getFilteredRecords().sort((a, b) => (a.checkIn || '').localeCompare(b.checkIn || ''));
         let html = '';
         filtered.forEach((r) => {
             const ci = r.checkIn ? r.checkIn.slice(5).replace('-','/') : '';
