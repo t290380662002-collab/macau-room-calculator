@@ -455,6 +455,7 @@
                                 <th>退房</th>
                                 <th>酒店</th>
                                 <th>房型</th>
+                                <th>訂單編號</th>
                                 <th>明細</th>
                                 <th>金額</th>
                                 <th>需洗碼</th>
@@ -545,6 +546,10 @@
                         <select id="fRoomType" onchange="triggerAutoCalc();">
                             <option value="">先選酒店</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label>訂單編號</label>
+                        <input type="text" id="fOrderNo" placeholder="選填">
                     </div>
                     <div class="form-group full">
                         <label>⚡ 明細(選擇後自動計算)</label>
@@ -804,6 +809,10 @@
                 <div class="form-group">
                     <label>房型</label>
                     <input type="text" id="eRoomType">
+                </div>
+                <div class="form-group">
+                    <label>訂單編號</label>
+                    <input type="text" id="eOrderNo">
                 </div>
                 <div class="form-group">
                     <label>明細</label>
@@ -1446,6 +1455,7 @@
         const checkIn = document.getElementById('fCheckIn').value;
         const checkOut = document.getElementById('fCheckOut').value;
         const roomType = document.getElementById('fRoomType').value;
+        const orderNo = document.getElementById('fOrderNo').value.trim();
         const detail = document.getElementById('fDetail').value.trim();
         const amount = parseFloat(document.getElementById('fAmount').value) || 0;
         const needWash = parseFloat(document.getElementById('fNeedWash').value) || 0;
@@ -1458,12 +1468,12 @@
 
         const records = loadRecords();
         const _id = Date.now() + '_' + Math.random().toString(36).substr(2,6);
-        records.push({ _id, lineHead, name, hotel, checkIn, checkOut, roomType, detail, amount, needWash, actualWash });
+        records.push({ _id, lineHead, name, hotel, checkIn, checkOut, roomType, orderNo, detail, amount, needWash, actualWash });
         saveRecords(records);
 
         document.getElementById('fLineHead').value = lineHead;
         document.getElementById('fName').value = '';
-        ['fCheckIn','fCheckOut','fDetail','fAmount','fNeedWash','fActualWash'].forEach(id => document.getElementById(id).value = '');
+        ['fCheckIn','fCheckOut','fOrderNo','fDetail','fAmount','fNeedWash','fActualWash'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('fHotel').value = '';
         document.getElementById('fRoomType').innerHTML = '<option value="">先選酒店</option>';
 
@@ -1505,6 +1515,7 @@
                 <td>${co}</td>
                 <td class="col-hotel">${r.hotel}</td>
                 <td>${r.roomType || '-'}</td>
+                <td class="col-detail">${r.orderNo || '-'}</td>
                 <td class="col-detail">${r.detail || '-'}</td>
                 <td class="col-amount">${r.amount.toLocaleString()}</td>
                 <td class="col-need">${r.needWash}</td>
@@ -1585,6 +1596,7 @@
         document.getElementById('eCheckIn').value = r.checkIn;
         document.getElementById('eCheckOut').value = r.checkOut;
         document.getElementById('eRoomType').value = r.roomType || '';
+        document.getElementById('eOrderNo').value = r.orderNo || '';
         document.getElementById('eDetail').value = r.detail || '';
         document.getElementById('eAmount').value = r.amount;
         document.getElementById('eNeedWash').value = r.needWash;
@@ -1611,6 +1623,7 @@
             checkIn: document.getElementById('eCheckIn').value,
             checkOut: document.getElementById('eCheckOut').value,
             roomType: document.getElementById('eRoomType').value.trim(),
+            orderNo: document.getElementById('eOrderNo').value.trim(),
             detail: document.getElementById('eDetail').value.trim(),
             amount: parseFloat(document.getElementById('eAmount').value) || 0,
             needWash: parseFloat(document.getElementById('eNeedWash').value) || 0,
@@ -1831,9 +1844,9 @@
         const records = loadRecords();
         if (records.length === 0) return alert('尚無記錄可匯出');
 
-        let csv = '\uFEFF線頭,姓名,入住日,退房日,酒店,房型,明細,金額,需洗碼量,開工洗碼量\n';
+        let csv = '\uFEFF線頭,姓名,入住日,退房日,酒店,房型,訂單編號,明細,金額,需洗碼量,開工洗碼量\n';
         records.forEach(r => {
-            csv += `${r.lineHead || ''},${r.name},${r.checkIn},${r.checkOut},${r.hotel},"${r.roomType || ''}","${r.detail || ''}",${r.amount},${r.needWash},${r.actualWash}\n`;
+            csv += `${r.lineHead || ''},${r.name},${r.checkIn},${r.checkOut},${r.hotel},"${r.roomType || ''}","${r.orderNo || ''}","${r.detail || ''}",${r.amount},${r.needWash},${r.actualWash}\n`;
         });
 
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
