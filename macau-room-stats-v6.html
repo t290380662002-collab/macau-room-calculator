@@ -455,7 +455,6 @@
                                 <th>退房</th>
                                 <th>酒店</th>
                                 <th>房型</th>
-                                <th>訂單編號</th>
                                 <th>明細</th>
                                 <th>金額</th>
                                 <th>需洗碼</th>
@@ -1515,7 +1514,6 @@
                 <td>${co}</td>
                 <td class="col-hotel">${r.hotel}</td>
                 <td>${r.roomType || '-'}</td>
-                <td class="col-detail">${r.orderNo || '-'}</td>
                 <td class="col-detail">${r.detail || '-'}</td>
                 <td class="col-amount">${r.amount.toLocaleString()}</td>
                 <td class="col-need">${r.needWash}</td>
@@ -1848,9 +1846,9 @@
         const records = loadRecords();
         if (records.length === 0) return alert('尚無記錄可匯出');
 
-        let csv = '\uFEFF線頭,姓名,入住日,退房日,酒店,房型,訂單編號,明細,金額,需洗碼量,開工洗碼量\n';
+        let csv = '\uFEFF線頭,姓名,入住日,退房日,酒店,房型,明細,金額,需洗碼量,開工洗碼量\n';
         records.forEach(r => {
-            csv += `${r.lineHead || ''},${r.name},${r.checkIn},${r.checkOut},${r.hotel},"${r.roomType || ''}","${r.orderNo || ''}","${r.detail || ''}",${r.amount},${r.needWash},${r.actualWash}\n`;
+            csv += `${r.lineHead || ''},${r.name},${r.checkIn},${r.checkOut},${r.hotel},"${r.roomType || ''}","${r.detail || ''}",${r.amount},${r.needWash},${r.actualWash}\n`;
         });
 
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
