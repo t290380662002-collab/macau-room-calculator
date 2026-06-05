@@ -883,6 +883,13 @@
         firebaseReady = false;
     }
 
+    // ========== XSS防護: HTML轉義 ==========
+    function esc(str) {
+        if (!str && str !== 0) return '';
+        const s = String(str);
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
     // ========== 線頭管理 ==========
     let lineHeads = ['馬', '牛', '江', '杰'];
     // currentEditIndex 已廢棄,改用 currentEditId
@@ -932,7 +939,7 @@
         const prevVal = sel.value;
         sel.innerHTML = '<option value=""' + (currentFilter===''?' selected':'') + '>全部</option>';
         lineHeads.forEach(lh => {
-            sel.innerHTML += '<option value="' + lh + '"' + (currentFilter===lh?' selected':'') + '>' + lh + '</option>';
+            sel.innerHTML += '<option value="' + esc(lh) + '"' + (currentFilter===lh?' selected':'') + '>' + esc(lh) + '</option>';
         });
         sel.value = prevVal || currentFilter;
     }
@@ -964,7 +971,7 @@
         lineHeads.forEach((lh, i) => {
             list.innerHTML += `
                 <div class="linehead-item">
-                    <span class="lh-name">${lh}</span>
+                    <span class="lh-name">${esc(lh)}</span>
                     <button class="lh-del" onclick="delLineHead(${i})">刪除</button>
                 </div>
             `;
@@ -1411,7 +1418,7 @@
         sel.innerHTML = '<option value="">選擇房型</option>';
         if (hotel && hotelData[hotel]) {
             hotelData[hotel].rooms.forEach(r => {
-                sel.innerHTML += `<option value="${r.code}">${r.code} ${r.name}</option>`;
+                sel.innerHTML += `<option value="${esc(r.code)}">${esc(r.code)} ${esc(r.name)}</option>`;
             });
         }
     }
@@ -1541,16 +1548,16 @@
             const ci = r.checkIn ? r.checkIn.slice(5).replace('-','/') : '';
             const co = r.checkOut ? r.checkOut.slice(5).replace('-','/') : '';
             html += `<tr>
-                <td class="col-linehead">${r.lineHead || '-'}</td>
-                <td>${r.agentName || '-'}</td>
-                <td class="col-name">${r.name}</td>
+                <td class="col-linehead">${esc(r.lineHead) || '-'}</td>
+                <td>${esc(r.agentName) || '-'}</td>
+                <td class="col-name">${esc(r.name)}</td>
                 <td>${ci}</td>
                 <td>${co}</td>
-                <td class="col-hotel">${r.hotel}</td>
-                <td>${r.checkinPerson || '-'}</td>
-                <td>${r.roomType || '-'}</td>
-                <td>${resolveRoomName(r.hotel, r.roomType)}</td>
-                <td class="col-detail">${r.detail || '-'}</td>
+                <td class="col-hotel">${esc(r.hotel)}</td>
+                <td>${esc(r.checkinPerson) || '-'}</td>
+                <td>${esc(r.roomType) || '-'}</td>
+                <td>${esc(resolveRoomName(r.hotel, r.roomType))}</td>
+                <td class="col-detail">${esc(r.detail) || '-'}</td>
                 <td class="col-amount">${r.amount.toLocaleString()}</td>
                 <td class="col-need">${r.needWash}</td>
                 <td class="col-actual">${r.actualWash}</td>
@@ -1709,9 +1716,9 @@
         Object.values(overview).forEach(o => {
             const rate = o.needWash > 0 ? (o.actualWash / o.needWash * 100) : 0;
             html += `<tr>
-                <td class="col-linehead">${o.lineHead}</td>
-                <td>${o.agentName || '-'}</td>
-                <td class="col-name">${o.name}</td>
+                <td class="col-linehead">${esc(o.lineHead)}</td>
+                <td>${esc(o.agentName) || '-'}</td>
+                <td class="col-name">${esc(o.name)}</td>
                 <td>${o.count}</td>
                 <td class="col-amount">${o.amount.toLocaleString()}</td>
                 <td class="col-need">${o.needWash}</td>
@@ -1731,12 +1738,12 @@
         Object.entries(hotelData).forEach(([hotel, data]) => {
             data.rooms.forEach((r, idx) => {
                 const row = `<tr>
-                    <td class="col-hotel">${hotel}</td>
-                    <td>${r.code}</td>
-                    <td>${r.name}</td>
-                    <td>${r.weekday}</td>
-                    <td>${r.weekend}</td>
-                    <td>${r.premium || '-'}</td>
+                    <td class="col-hotel">${esc(hotel)}</td>
+                    <td>${esc(r.code)}</td>
+                    <td>${esc(r.name)}</td>
+                    <td>${esc(r.weekday)}</td>
+                    <td>${esc(r.weekend)}</td>
+                    <td>${esc(r.premium) || '-'}</td>
                     <td class="col-need">${r.wash}萬</td>
                     <td style="white-space:nowrap;">
                         <button onclick="openCondEditModal('${hotel}',${idx})" style="padding:3px 8px;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);color:#ffd700;border-radius:4px;cursor:pointer;font-size:0.75em;">✏️</button>
