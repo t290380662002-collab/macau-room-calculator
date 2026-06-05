@@ -857,6 +857,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
     <script>
     // ========== Firebase 配置 ==========
     const firebaseConfig = {
@@ -876,11 +877,19 @@
     try {
         firebase.initializeApp(firebaseConfig);
         db = firebase.database();
-        firebaseReady = true;
-        console.log('✅ Firebase 連接成功');
+        // 匿名認證 — 滿足 Security Rules 的 auth != null
+        firebase.auth().signInAnonymously()
+            .then(() => { firebaseReady = true; console.log('✅ Firebase 連接成功 (已認證)'); syncStatus('● 雲端同步中','#2ecc71'); })
+            .catch(e => { console.warn('⚠️ 認證失敗,使用離線模式:', e.message); syncStatus('● 離線模式','#ff4d4d'); });
     } catch(e) {
-        console.warn('⚠️ Firebase 連接失敗,使用離線模式:', e.message);
+        console.warn('⚠️ Firebase 初始化失敗,使用離線模式:', e.message);
         firebaseReady = false;
+        syncStatus('● 離線模式','#ff4d4d');
+    }
+
+    function syncStatus(text, color) {
+        const el = document.getElementById('syncStatus');
+        if (el) { el.textContent = text; el.style.color = color; }
     }
 
     // ========== XSS防護: HTML轉義 ==========
@@ -1928,13 +1937,6 @@
         updateMonthLabel();
         renderRecords();
         if (document.getElementById('page-overview').classList.contains('active')) renderOverview();
-    }
-
-    // 更新同步狀態顯示
-    const syncEl = document.getElementById('syncStatus');
-    if (syncEl) {
-        syncEl.textContent = firebaseReady ? '● 雲端同步中' : '● 離線模式';
-        syncEl.style.color = firebaseReady ? '#2ecc71' : '#ff4d4d';
     }
 
     loadLineHeads();
