@@ -1574,11 +1574,15 @@
     // ========== 刪除記錄 ==========
     function delRecordById(_id) {
         if (!confirm('確定刪除這筆記錄?')) return;
-        const records = loadRecords();
-        const idx = records.findIndex(r => r._id === _id);
+        const all = loadAllRecords();
+        const idx = all.findIndex(r => r._id === _id);
         if (idx === -1) return alert('找不到記錄');
-        records.splice(idx, 1);
-        saveRecords(records);
+        all.splice(idx, 1);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+        if (firebaseReady && db && !isRemoteUpdate) {
+            db.ref('records/all').set(all)
+                .catch(e => console.warn('同步刪除失敗:', e.message));
+        }
         renderAll();
     }
 
