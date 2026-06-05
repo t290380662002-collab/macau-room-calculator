@@ -455,6 +455,7 @@
                                 <th>入住</th>
                                 <th>退房</th>
                                 <th>酒店</th>
+                                <th>Code</th>
                                 <th>房型</th>
                                 <th>明細</th>
                                 <th>金額</th>
@@ -1535,6 +1536,7 @@
                 <td>${ci}</td>
                 <td>${co}</td>
                 <td class="col-hotel">${r.hotel}</td>
+                <td>${r.roomType || '-'}</td>
                 <td>${resolveRoomName(r.hotel, r.roomType)}</td>
                 <td class="col-detail">${r.detail || '-'}</td>
                 <td class="col-amount">${r.amount.toLocaleString()}</td>
