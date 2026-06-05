@@ -450,6 +450,7 @@
                         <thead>
                             <tr>
                                 <th>線頭</th>
+                                <th>代理名稱</th>
                                 <th>姓名</th>
                                 <th>入住</th>
                                 <th>退房</th>
@@ -513,6 +514,10 @@
                             <select id="fLineHead" style="flex:0 0 90px;"></select>
                             <input type="text" id="fName" placeholder="名字" style="flex:1;">
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label>代理名稱</label>
+                        <input type="text" id="fAgentName" placeholder="選填">
                     </div>
                     <div class="form-group">
                         <label>酒店</label>
@@ -580,6 +585,7 @@
                         <thead>
                             <tr>
                                 <th>線頭</th>
+                                <th>代理名稱</th>
                                 <th>姓名</th>
                                 <th>筆數</th>
                                 <th>金額</th>
@@ -788,6 +794,10 @@
                 <div class="form-group">
                     <label>線頭</label>
                     <input type="text" id="eLineHead">
+                </div>
+                <div class="form-group">
+                    <label>代理名稱</label>
+                    <input type="text" id="eAgentName">
                 </div>
                 <div class="form-group">
                     <label>姓名</label>
@@ -1450,6 +1460,7 @@
     function addRecord() {
         const lineHead = document.getElementById('fLineHead').value;
         const name = document.getElementById('fName').value.trim();
+        const agentName = document.getElementById('fAgentName').value.trim();
         const hotel = document.getElementById('fHotel').value;
         const checkIn = document.getElementById('fCheckIn').value;
         const checkOut = document.getElementById('fCheckOut').value;
@@ -1467,11 +1478,12 @@
 
         const records = loadRecords();
         const _id = Date.now() + '_' + Math.random().toString(36).substr(2,6);
-        records.push({ _id, lineHead, name, hotel, checkIn, checkOut, roomType, orderNo, detail, amount, needWash, actualWash });
+        records.push({ _id, lineHead, agentName, name, hotel, checkIn, checkOut, roomType, orderNo, detail, amount, needWash, actualWash });
         saveRecords(records);
 
         document.getElementById('fLineHead').value = lineHead;
         document.getElementById('fName').value = '';
+        document.getElementById('fAgentName').value = '';
         ['fCheckIn','fCheckOut','fOrderNo','fDetail','fAmount','fNeedWash','fActualWash'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('fHotel').value = '';
         document.getElementById('fRoomType').innerHTML = '<option value="">先選酒店</option>';
@@ -1509,6 +1521,7 @@
             const co = r.checkOut ? r.checkOut.slice(5).replace('-','/') : '';
             html += `<tr>
                 <td class="col-linehead">${r.lineHead || '-'}</td>
+                <td>${r.agentName || '-'}</td>
                 <td class="col-name">${r.name}</td>
                 <td>${ci}</td>
                 <td>${co}</td>
@@ -1593,6 +1606,7 @@
         currentEditId = _id;
 
         document.getElementById('eLineHead').value = r.lineHead || '';
+        document.getElementById('eAgentName').value = r.agentName || '';
         document.getElementById('eName').value = r.name;
         document.getElementById('eHotel').value = r.hotel;
         document.getElementById('eCheckIn').value = r.checkIn;
@@ -1620,6 +1634,7 @@
         records[idx] = {
             _id: currentEditId,
             lineHead: document.getElementById('eLineHead').value.trim(),
+            agentName: document.getElementById('eAgentName').value.trim(),
             name: document.getElementById('eName').value.trim(),
             hotel: document.getElementById('eHotel').value,
             checkIn: document.getElementById('eCheckIn').value,
@@ -1645,9 +1660,9 @@
         const overview = {};
 
         filtered.forEach(r => {
-            const key = (r.lineHead || '') + '_' + r.name;
+            const key = (r.lineHead || '') + '_' + (r.agentName || '') + '_' + r.name;
             if (!overview[key]) {
-                overview[key] = { lineHead: r.lineHead || '', name: r.name, count: 0, amount: 0, needWash: 0, actualWash: 0 };
+                overview[key] = { lineHead: r.lineHead || '', agentName: r.agentName || '', name: r.name, count: 0, amount: 0, needWash: 0, actualWash: 0 };
             }
             overview[key].count++;
             overview[key].amount += r.amount;
@@ -1670,6 +1685,7 @@
             const rate = o.needWash > 0 ? (o.actualWash / o.needWash * 100) : 0;
             html += `<tr>
                 <td class="col-linehead">${o.lineHead}</td>
+                <td>${o.agentName || '-'}</td>
                 <td class="col-name">${o.name}</td>
                 <td>${o.count}</td>
                 <td class="col-amount">${o.amount.toLocaleString()}</td>
@@ -1846,9 +1862,9 @@
         const records = loadRecords();
         if (records.length === 0) return alert('尚無記錄可匯出');
 
-        let csv = '\uFEFF線頭,姓名,入住日,退房日,酒店,房型,明細,金額,需洗碼量,開工洗碼量\n';
+        let csv = '\uFEFF線頭,代理名稱,姓名,入住日,退房日,酒店,房型,明細,金額,需洗碼量,開工洗碼量\n';
         records.forEach(r => {
-            csv += `${r.lineHead || ''},${r.name},${r.checkIn},${r.checkOut},${r.hotel},"${r.roomType || ''}","${r.detail || ''}",${r.amount},${r.needWash},${r.actualWash}\n`;
+            csv += `${r.lineHead || ''},"${r.agentName || ''}",${r.name},${r.checkIn},${r.checkOut},${r.hotel},"${r.roomType || ''}","${r.detail || ''}",${r.amount},${r.needWash},${r.actualWash}\n`;
         });
 
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
