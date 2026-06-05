@@ -1401,23 +1401,32 @@
         sel.innerHTML = '<option value="">選擇房型</option>';
         if (hotel && hotelData[hotel]) {
             hotelData[hotel].rooms.forEach(r => {
-                sel.innerHTML += `<option value="${r.name}">${r.code} ${r.name}</option>`;
+                sel.innerHTML += `<option value="${r.code}">${r.code} ${r.name}</option>`;
             });
         }
+    }
+
+    // 解析房型代碼 → 完整名稱
+    function resolveRoomName(hotel, code) {
+        if (!hotel || !code) return code || '-';
+        const rooms = hotelData[hotel]?.rooms;
+        if (!rooms) return code;
+        const room = rooms.find(r => r.code === code);
+        return room ? room.name : code;
     }
 
     // ========== 自動計算 ==========
     function triggerAutoCalc() {
         const hotel = document.getElementById('fHotel').value;
-        const roomName = document.getElementById('fRoomType').value;
+        const roomCode = document.getElementById('fRoomType').value;
         const checkIn = document.getElementById('fCheckIn').value;
         const checkOut = document.getElementById('fCheckOut').value;
 
-        if (!hotel || !roomName || !checkIn || !checkOut) {
+        if (!hotel || !roomCode || !checkIn || !checkOut) {
             return;
         }
 
-        const room = hotelData[hotel]?.rooms.find(r => r.name === roomName);
+        const room = hotelData[hotel]?.rooms.find(r => r.code === roomCode);
         if (!room) { return; }
 
         const start = new Date(checkIn);
@@ -1526,7 +1535,7 @@
                 <td>${ci}</td>
                 <td>${co}</td>
                 <td class="col-hotel">${r.hotel}</td>
-                <td>${r.roomType || '-'}</td>
+                <td>${resolveRoomName(r.hotel, r.roomType)}</td>
                 <td class="col-detail">${r.detail || '-'}</td>
                 <td class="col-amount">${r.amount.toLocaleString()}</td>
                 <td class="col-need">${r.needWash}</td>
