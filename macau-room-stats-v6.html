@@ -877,10 +877,10 @@
     try {
         firebase.initializeApp(firebaseConfig);
         db = firebase.database();
-        // 匿名認證 — 滿足 Security Rules 的 auth != null
+        // 嘗試匿名認證；即使失敗仍可使用（Security Rules 已設公開讀寫）
         firebase.auth().signInAnonymously()
             .then(() => { firebaseReady = true; console.log('✅ Firebase 連接成功 (已認證)'); syncStatus('● 雲端同步中','#2ecc71'); })
-            .catch(e => { console.warn('⚠️ 認證失敗,使用離線模式:', e.message); syncStatus('● 離線模式','#ff4d4d'); });
+            .catch(e => { console.warn('⚠️ 認證失敗,使用公開模式:', e.message); firebaseReady = true; syncStatus('● 雲端同步','#f39c12'); });
     } catch(e) {
         console.warn('⚠️ Firebase 初始化失敗,使用離線模式:', e.message);
         firebaseReady = false;
