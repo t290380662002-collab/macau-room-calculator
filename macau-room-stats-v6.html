@@ -1784,12 +1784,20 @@
 
         if (firebaseReady && db) {
             try {
-                // 直接從 Firebase 拉最新全量資料再精準更新，避免本地快取與 Firebase 不同步
+                // 先從 Firebase 拉最新資料，找不到時回退到 localStorage（Bot 可能已覆蓋）
                 const snap = await db.ref('records/all').once('value');
                 const latest = snap.val();
-                let all = (latest && Array.isArray(latest)) ? latest.filter(r => r !== null) : loadAllRecords();
-                const idx = all.findIndex(r => r && r._id === currentEditId);
-                if (idx === -1) { alert('❌ 找不到記錄，可能已被刪除'); return; }
+                let all = (latest && Array.isArray(latest)) ? latest.filter(r => r !== null) : [];
+                let idx = all.findIndex(r => r && r._id === currentEditId);
+                if (idx === -1) {
+                    // Firebase 中找不到，嘗試從 localStorage 找回
+                    const localRecords = loadAllRecords();
+                    idx = localRecords.findIndex(r => r && r._id === currentEditId);
+                    if (idx === -1) { alert('❌ 找不到記錄，可能已被刪除'); return; }
+                    // 把 localStorage 的記錄合併回 Firebase
+                    all = [...all, localRecords[idx]];
+                    idx = all.length - 1;
+                }
                 all[idx] = updatedRecord;
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
                 await db.ref('records/all').set(all);
