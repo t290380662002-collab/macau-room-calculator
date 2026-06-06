@@ -1626,18 +1626,29 @@
     }
 
     // ========== 刪除記錄 ==========
-    function delRecordById(_id) {
+    async function delRecordById(_id) {
         if (!confirm('確定刪除這筆記錄?')) return;
-        const all = loadAllRecords();
-        const idx = all.findIndex(r => r._id === _id);
-        if (idx === -1) return alert('找不到記錄');
-        all.splice(idx, 1);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-        if (firebaseReady && db && !isRemoteUpdate) {
-            db.ref('records/all').set(all)
-                .catch(e => console.warn('同步刪除失敗:', e.message));
+        if (firebaseReady && db) {
+            try {
+                // 從 Firebase 拉最新資料再刪除，確保不丟失 Bot 新增的記錄
+                const snap = await db.ref('records/all').once('value');
+                const latest = snap.val();
+                let all = (latest && Array.isArray(latest)) ? latest.filter(r => r !== null) : loadAllRecords();
+                const newAll = all.filter(r => r && r._id !== _id);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(newAll));
+                await db.ref('records/all').set(newAll);
+                renderAll();
+            } catch (e) {
+                alert('❌ 刪除失敗: ' + e.message);
+            }
+        } else {
+            const all = loadAllRecords();
+            const idx = all.findIndex(r => r._id === _id);
+            if (idx === -1) return alert('找不到記錄');
+            all.splice(idx, 1);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+            renderAll();
         }
-        renderAll();
     }
 
     // ========== 編輯記錄 ==========
@@ -1670,12 +1681,8 @@
         currentEditId = '';
     }
 
-    function saveEdit() {
-        const records = loadRecords();
-        const idx = records.findIndex(r => r._id === currentEditId);
-        if (idx === -1) return alert('找不到記錄');
-
-        records[idx] = {
+    async function saveEdit() {
+        const updatedRecord = {
             _id: currentEditId,
             lineHead: document.getElementById('eLineHead').value.trim(),
             agentName: document.getElementById('eAgentName').value.trim(),
@@ -1692,10 +1699,34 @@
             actualWash: parseFloat(document.getElementById('eActualWash').value) || 0
         };
 
-        saveRecords(records);
         closeEdit();
-        renderAll();
-        alert('✅ 已更新!');
+
+        if (firebaseReady && db) {
+            try {
+                // 直接從 Firebase 拉最新全量資料再精準更新，避免本地快取與 Firebase 不同步
+                const snap = await db.ref('records/all').once('value');
+                const latest = snap.val();
+                let all = (latest && Array.isArray(latest)) ? latest.filter(r => r !== null) : loadAllRecords();
+                const idx = all.findIndex(r => r && r._id === currentEditId);
+                if (idx === -1) { alert('❌ 找不到記錄，可能已被刪除'); return; }
+                all[idx] = updatedRecord;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+                await db.ref('records/all').set(all);
+                renderAll();
+                alert('✅ 已更新！');
+            } catch (e) {
+                alert('❌ 更新失敗: ' + e.message);
+            }
+        } else {
+            // 離線模式：僅更新 localStorage
+            const all = loadAllRecords();
+            const idx = all.findIndex(r => r._id === currentEditId);
+            if (idx === -1) return alert('找不到記錄');
+            all[idx] = updatedRecord;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+            renderAll();
+            alert('✅ 已更新（離線）');
+        }
     }
 
     // ========== 總覽 ==========
