@@ -664,6 +664,7 @@
                                 <th>線頭</th>
                                 <th>代理名稱</th>
                                 <th>姓名</th>
+                                <th>團名</th>
                                 <th>筆數</th>
                                 <th>金額</th>
                                 <th>需洗碼</th>
@@ -1824,6 +1825,7 @@
             overview[key].amount += r.amount;
             overview[key].needWash += r.needWash;
             overview[key].actualWash += r.actualWash;
+            if (!overview[key].groupName && r.groupName) overview[key].groupName = r.groupName;
         });
 
         const tbody = document.getElementById('overviewBody');
@@ -1843,6 +1845,7 @@
                 <td class="col-linehead">${esc(o.lineHead)}</td>
                 <td>${esc(o.agentName) || '-'}</td>
                 <td class="col-name">${esc(o.name)}</td>
+                <td>${esc(o.groupName) || '-'}</td>
                 <td>${o.count}</td>
                 <td class="col-amount">${o.amount.toLocaleString()}</td>
                 <td class="col-need">${o.needWash}</td>
