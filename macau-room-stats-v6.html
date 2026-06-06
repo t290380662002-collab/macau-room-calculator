@@ -877,10 +877,14 @@
     try {
         firebase.initializeApp(firebaseConfig);
         db = firebase.database();
-        // 嘗試匿名認證；即使失敗仍可使用（Security Rules 已設公開讀寫）
+        firebaseReady = true;  // 立即設為 true，不等待非同步認證
+        syncStatus('● 雲端同步中','#2ecc71');
+        console.log('✅ Firebase 連接成功');
+
+        // 嘗試匿名認證（不阻塞，僅用於未來安全規則）
         firebase.auth().signInAnonymously()
-            .then(() => { firebaseReady = true; console.log('✅ Firebase 連接成功 (已認證)'); syncStatus('● 雲端同步中','#2ecc71'); })
-            .catch(e => { console.warn('⚠️ 認證失敗,使用公開模式:', e.message); firebaseReady = true; syncStatus('● 雲端同步','#f39c12'); });
+            .then(() => { console.log('✅ Firebase 匿名認證成功'); syncStatus('● 雲端同步中','#2ecc71'); })
+            .catch(e => { console.warn('⚠️ 認證失敗,使用公開模式:', e.message); });
     } catch(e) {
         console.warn('⚠️ Firebase 初始化失敗,使用離線模式:', e.message);
         firebaseReady = false;
