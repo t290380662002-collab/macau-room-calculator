@@ -13,11 +13,72 @@
             padding: 12px;
             font-size: 14px;
             -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         .container { max-width: 960px; margin: 0 auto; }
 
         @media (max-width: 768px) {
+            body { padding: 8px; font-size: 13px; }
             .container { max-width: 100%; }
+            .header h1 { font-size: 1.1em; }
+            .header .sub { font-size: 0.7em; }
+
+            /* 統計卡片：等寬兩行 */
+            .stats-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 6px;
+                overflow-x: visible;
+            }
+            .stat-card {
+                min-width: 0;
+                padding: 8px 6px;
+            }
+            .stat-card .label { font-size: 0.7em; }
+            .stat-card .value { font-size: 1em; }
+
+            /* 月份導航 */
+            .month-nav { gap: 8px; }
+            .month-nav button { padding: 5px 10px; font-size: 0.8em; }
+            .month-nav .month-label { font-size: 1em; }
+
+            /* 表單：單列 */
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group input, .form-group select { padding: 8px; font-size: 16px; }
+            .form-group label { font-size: 0.7em; }
+
+            /* 表格 */
+            table { font-size: 0.75em; min-width: 600px; }
+            th, td { padding: 5px 3px; }
+            .table-wrap {
+                -webkit-overflow-scrolling: touch;
+                /* 硬體加速防止殘影 */
+                transform: translateZ(0);
+                will-change: scroll-position;
+            }
+
+            /* Tab */
+            .tab-btn { font-size: 0.8em; padding: 7px 3px; }
+
+            /* 按鈕 */
+            .btn-export, .btn-clear { padding: 5px 10px; font-size: 0.75em; }
+
+            /* 底部統計 */
+            .summary-card { padding: 10px; }
+            .summary-row { font-size: 0.8em; padding: 5px 0; }
+            .summary-row.highlight { margin: 0 -10px; padding: 7px 10px; }
+
+            /* Modal */
+            .modal-box { max-width: 95vw; padding: 14px; }
+            .modal-overlay { padding: 10px; }
+        }
+
+        @media (max-width: 400px) {
+            .stats-row { grid-template-columns: 1fr 1fr; gap: 4px; }
+            .stat-card { padding: 6px 4px; border-radius: 8px; }
+            .header h1 { font-size: 1em; }
+            .linehead-filter { flex-wrap: wrap; gap: 4px; }
         }
 
         /* 標題 */
@@ -120,11 +181,15 @@
             border-radius: 10px;
             padding: 10px 12px;
             text-align: center;
+            /* 防止手機殘影 */
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
         .stat-card .label {
             font-size: 0.75em;
-            color: #8888;
+            color: #888;
             margin-bottom: 4px;
+            white-space: nowrap;
         }
         .stat-card .value {
             font-size: 1.15em;
@@ -188,7 +253,7 @@
         .form-group { display: flex; flex-direction: column; gap: 3px; }
         .form-group label {
             font-size: 0.75em;
-            color: #8888;
+            color: #888;
         }
         .form-group input,
         .form-group select {
