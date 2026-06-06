@@ -1821,13 +1821,14 @@
     // ========== 總覽 ==========
     function renderOverview() {
         const records = loadRecords();
+        if (records.length > 0) console.log('[debug] 第一筆記錄欄位:', Object.keys(records[0]), '| groupName:', records[0].groupName);
         const filtered = currentFilter ? records.filter(r => (r.lineHead || '') === currentFilter) : records;
         const overview = {};
 
         filtered.forEach(r => {
             const key = (r.lineHead || '') + '_' + (r.agentName || '') + '_' + r.name;
             if (!overview[key]) {
-                overview[key] = { lineHead: r.lineHead || '', agentName: r.agentName || '', name: r.name, count: 0, amount: 0, needWash: 0, actualWash: 0 };
+                overview[key] = { lineHead: r.lineHead || '', agentName: r.agentName || '', name: r.name, groupName: r.groupName || '', count: 0, amount: 0, needWash: 0, actualWash: 0 };
             }
             overview[key].count++;
             overview[key].amount += r.amount;
